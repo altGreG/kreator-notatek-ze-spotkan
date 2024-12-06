@@ -21,7 +21,7 @@ def open_file():
     if file_path:
         print(f"Wybrano plik: {file_path}")
         # Dodaj obsługę wczytywania pliku
-
+        #Placeholder
 def show_settings():
     # Placeholder okno ustawień
     messagebox.showinfo("Ustawienia", "Ustawienia aplikacji.")
