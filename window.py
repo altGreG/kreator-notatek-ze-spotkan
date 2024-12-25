@@ -2,15 +2,11 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 from recorder import start_recording, stop_recording
 
-# def start_recording():
-#     status_label.config(text="Status: Nagrywanie w toku...")
-#     # Placeholder funkcjonalność do nagrywania
-#     print("Rozpoczynam nagrywanie...")
-#
-# def stop_recording():
-#     status_label.config(text="Status: Nagrywanie zakończone.")
-#     # Placeholder funkcjonalność zakończenia nagrywania
-#     print("Nagrywanie zakończone.")
+def update_status(new_status):
+    """
+    Aktualizuje tekst widżetu statusu.
+    """
+    status_label.config(text=f"Status: {new_status}")
 
 def generate_notes():
     # Placeholder funkcjonalność generowania notatek
@@ -22,7 +18,8 @@ def open_file():
     if file_path:
         print(f"Wybrano plik: {file_path}")
         # Dodaj obsługę wczytywania pliku
-        #Placeholder
+        # Placeholder
+
 def show_settings():
     # Placeholder okno ustawień
     messagebox.showinfo("Ustawienia", "Ustawienia aplikacji.")
@@ -41,7 +38,7 @@ menu_bar = tk.Menu(app)
 
 # Menu Plik
 file_menu = tk.Menu(menu_bar, tearoff=0)
-file_menu.add_command(label="Nowe nagranie", command=start_recording)
+file_menu.add_command(label="Nowe nagranie", command=lambda: start_recording(update_status))
 file_menu.add_command(label="Otwórz...", command=open_file)
 file_menu.add_separator()
 file_menu.add_command(label="Wyjdź", command=app.quit)
@@ -63,10 +60,10 @@ app.config(menu=menu_bar)
 record_frame = tk.Frame(app)
 record_frame.pack(pady=20)
 
-start_button = tk.Button(record_frame, text="Rozpocznij nagrywanie", command=start_recording)
+start_button = tk.Button(record_frame, text="Rozpocznij nagrywanie", command=lambda: start_recording(update_status))
 start_button.grid(row=0, column=0, padx=10)
 
-stop_button = tk.Button(record_frame, text="Zakończ nagrywanie", command=stop_recording)
+stop_button = tk.Button(record_frame, text="Zakończ nagrywanie", command=lambda: stop_recording(update_status))
 stop_button.grid(row=0, column=1, padx=10)
 
 # Sekcja transkrypcji i notatek
