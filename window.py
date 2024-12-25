@@ -1,15 +1,16 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
+from recorder import start_recording, stop_recording
 
-def start_recording():
-    status_label.config(text="Status: Nagrywanie w toku...")
-    # Placeholder funkcjonalność do nagrywania
-    print("Rozpoczynam nagrywanie...")
-
-def stop_recording():
-    status_label.config(text="Status: Nagrywanie zakończone.")
-    # Placeholder funkcjonalność zakończenia nagrywania
-    print("Nagrywanie zakończone.")
+# def start_recording():
+#     status_label.config(text="Status: Nagrywanie w toku...")
+#     # Placeholder funkcjonalność do nagrywania
+#     print("Rozpoczynam nagrywanie...")
+#
+# def stop_recording():
+#     status_label.config(text="Status: Nagrywanie zakończone.")
+#     # Placeholder funkcjonalność zakończenia nagrywania
+#     print("Nagrywanie zakończone.")
 
 def generate_notes():
     # Placeholder funkcjonalność generowania notatek
