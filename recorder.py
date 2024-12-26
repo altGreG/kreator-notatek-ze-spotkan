@@ -8,7 +8,7 @@ recording_process = None  # Zmienna globalna do przechowywania procesu nagrywani
 
 def start_recording(update_status):
     """
-    Funkcja rozpoczynająca nagrywanie ekranu i dźwięku Dla linuxa.
+    Funkcja rozpoczynająca nagrywanie ekranu i dźwięku Dla linuxa i Windowsa.
     """
     global recording_process
 
@@ -16,16 +16,16 @@ def start_recording(update_status):
     update_status("Nagrywanie w toku...")
 
     system_name = platform.system()
+    # Ścieżka do zapisu pliku wideo
+    output_dir = os.path.join(os.getcwd(), "nagrania")
+    os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
+
+    # Tworzenie unikalnej nazwy pliku na podstawie daty i czasu
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output_file = os.path.join(output_dir, f"Nagranie_{timestamp}.mp4")
+
     if system_name == "Linux":
-        # Ścieżka do zapisu pliku wideo
-        output_dir = os.path.join(os.getcwd(), "nagrania")
-        os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
-
-        # Tworzenie unikalnej nazwy pliku na podstawie daty i czasu
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        output_file = os.path.join(output_dir, f"Nagranie_{timestamp}.mp4")
-
-        # Polecenie FFmpeg
+        # Polecenie FFmpeg dla Linuxa
         ffmpeg_command = [
             "ffmpeg",
             "-y",  # Nadpisywanie istniejących plików
@@ -40,17 +40,32 @@ def start_recording(update_status):
             "-pix_fmt", "yuv420p",  # Format pikseli
             output_file
         ]
-
-        # Uruchomienie procesu FFmpeg
-        try:
-            recording_process = subprocess.Popen(ffmpeg_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print(f"Nagrywanie rozpoczęte. Plik zostanie zapisany jako: {output_file}")
-        except Exception as e:
-            update_status(f"Błąd podczas rozpoczynania nagrywania: {e}")
     elif system_name == "Windows":
-        update_status("Nagrywanie dla Windows nie jest jeszcze zaimplementowane.")
+        # Polecenie FFmpeg dla Windowsa
+        ffmpeg_command = [
+            "ffmpeg",
+            "-y",  # Nadpisywanie istniejących plików
+            "-f", "gdigrab",  # Przechwytywanie ekranu
+            "-i", "desktop",  # Desktop jako źródło obrazu
+            "-f", "dshow",  # Przechwytywanie dźwięku
+            "-i", "audio=Stereo Mix",  # Nazwa urządzenia dźwiękowego
+            "-c:v", "libx264",  # Kodowanie wideo
+            "-preset", "ultrafast",  # Szybkie kodowanie
+            "-c:a", "aac",  # Kodowanie audio
+            "-b:a", "192k",  # Jakość dźwięku
+            "-pix_fmt", "yuv420p",  # Format pikseli
+            output_file
+        ]
     else:
         update_status(f"Nagrywanie nie jest wspierane na tym systemie: {system_name}")
+        return
+
+    # Uruchomienie procesu FFmpeg
+    try:
+        recording_process = subprocess.Popen(ffmpeg_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print(f"Nagrywanie rozpoczęte. Plik zostanie zapisany jako: {output_file}")
+    except Exception as e:
+        update_status(f"Błąd podczas rozpoczynania nagrywania: {e}")
 
 def stop_recording(update_status):
     """
@@ -62,7 +77,7 @@ def stop_recording(update_status):
     update_status("Kończenie nagrywania...")
 
     system_name = platform.system()
-    if system_name == "Linux":
+    if system_name in ["Linux", "Windows"]:
         if recording_process:
             try:
                 # Wysłanie sygnału do zakończenia procesu FFmpeg
@@ -76,7 +91,5 @@ def stop_recording(update_status):
                 recording_process = None
         else:
             update_status("Nie znaleziono aktywnego nagrywania.")
-    elif system_name == "Windows":
-        update_status("Nagrywanie dla Windows nie jest jeszcze zaimplementowane.")
     else:
         update_status(f"Nagrywanie nie jest wspierane na tym systemie: {system_name}")
