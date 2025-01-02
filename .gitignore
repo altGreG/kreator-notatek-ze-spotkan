@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 nagrania/
+txt/
+sa_gc.json
