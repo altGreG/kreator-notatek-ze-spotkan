@@ -1,0 +1,7 @@
+openai-whisper
+setuptools-rust
+speechrecognition
+openai
+torch
+google-cloud-speech
+protobuf
