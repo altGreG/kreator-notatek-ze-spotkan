@@ -18,6 +18,7 @@ pip install speechrecognition
 pip install openai
 pip install google-cloud-speech
 pip install protobuf
+pip install loguru
 
 
 ```
@@ -49,6 +50,7 @@ pip install speechrecognition
 pip install openai
 pip install google-cloud-speech
 pip install protobuf
+pip install loguru
 ```
 ---
 
