@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
-from recorder import start_recording, stop_recording
+from app.recorder import start_recording, stop_recording
 from loguru import logger as log
 
 def update_status(new_status):

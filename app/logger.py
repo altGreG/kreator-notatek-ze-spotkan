@@ -2,7 +2,7 @@ from loguru import logger as log
 
 """
 Uwaga: Jeśli chcemy po prostu wypisać coś w kosoli bez aktualizacji statusu aplikacji GUI, to po prostu użyjmy print() lub
-       metod z klasy logger z biblioteki loguru, klasy u nas przemianowanej na log. Przykłady można użyć:
+       metod z klasy logger z biblioteki loguru, klasy u nas przemianowanej na log. Przykładowo można użyć:
     
     log.debug(msg)
     log.trace(msg)

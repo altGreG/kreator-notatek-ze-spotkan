@@ -7,7 +7,7 @@ import io
 from google.oauth2 import service_account
 from google.cloud import speech
 from loguru import logger as log
-from logger import log_status
+from app.logger import log_status
 
 extracting_process = -1
 
@@ -16,7 +16,10 @@ def extract_audio_from_video(video_file_path, update_status):
     global extracting_process
 
     system_name = platform.system()
-    filename_and_path, ext = os.path.splitext(video_file_path)
+    filename = ((video_file_path.replace("\\", "/")).split("/")[-1]).split(".")[0]
+    output_dir = (video_file_path.replace("\\", "/")).rsplit("/", 1)[0] + "/audio"
+    os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
+    filename_and_path = output_dir + "/" + filename
     audio_ext = "mp3"
 
     log_status("Ekstrakcja audio w toku...", "info", update_status)
@@ -100,7 +103,7 @@ def transcribe_with_gcloud(audio_file_path, update_status):
     Uwaga: Użytkownik sam musi pozyskać plik JSON do autoryzacji w Google Cloud API
     """
     log_status("Załadowanie pliku autoryzacyjnego do usług Google Cloud, konfiguracja.", "info", update_status)
-    client_file = './sa_gc.json'
+    client_file = '../sa_gc.json'
     credentials = service_account.Credentials.from_service_account_file(client_file)
     client = speech.SpeechClient(credentials=credentials)
 
@@ -126,7 +129,7 @@ def transcribe_with_gcloud(audio_file_path, update_status):
         # Proste formatowanie tekstu
         transcribed_text = text_formatting(transcribed_text_before_formatting)
 
-        log_status("Skutecznie dokonano transkrypcji audio.", "success", update_status)
+        log_status("Sukces. Dokonano transkrypcji audio.", "success", update_status)
         print("Przetranskrybowany tekst:\n", transcribed_text)
     except Exception as err:
         log_status(f"Wystąpił problem w czasie transkrypcji audio: {err}", "error", update_status)
@@ -171,17 +174,17 @@ def save_text_to_txt(filename, transcribed_text, update_status):
 
 # Uwaga: Ścieżki i nazwy plików trzeba dostosować pod siebie w czasie testów na własnej maszynie
 def audio_extraction_test():
-    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\nagrania\test.mkv"
+    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\app\nagrania\test.mkv"
     update_status = "placeholder"
     extract_audio_from_video(s, update_status)
 
 def audio_transcribe_whisper_test():
-    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\nagrania\test.mp3"
+    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\app\nagrania\audio\test.mp3"
     update_status = "placeholder"
     return transcribe_with_whisper_offline(s, update_status)
 
 def audio_transcribe_gc_test():
-    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\nagrania\test.mp3"
+    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\app\nagrania\audio\test.mp3"
     update_status = "placeholder"
     return transcribe_with_gcloud(s, update_status)
 
