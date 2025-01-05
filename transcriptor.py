@@ -12,14 +12,12 @@ extracting_process = -1
 
 def extract_audio_from_video(video_file_path):
     """Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`"""
-
-
     global extracting_process
+
     system_name = platform.system()
     filename_and_path, ext = os.path.splitext(video_file_path)
     audio_ext = "mp3"
 
-    # Ekstracja ścieżki audio z pliku i zapis do mp3
     # update_status("Ekstrakcja audio w toku...")
     log.info(f"Rozpoczęto ekstrakcję audio z video. ({system_name})\n"
              f"Scieżka do pliku video: {video_file_path}")
@@ -32,7 +30,7 @@ def extract_audio_from_video(video_file_path):
         except Exception as err:
             # update_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
             log.error(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
-            return err
+            return -1
     elif system_name == "Linux":
         try:
             extracting_process = subprocess.call(["ffmpeg", "-y", "-i", video_file_path, f"{filename_and_path}.{audio_ext}"],
@@ -41,15 +39,17 @@ def extract_audio_from_video(video_file_path):
         except Exception as err:
             # update_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
             log.error(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
-            return err
+            return -1
 
     if extracting_process != 0:
         # update_status(f"Błąd w czasie ekstrakcji audio z wideo. Kod błędu: {extracting_process}")
         log.error(f"Błąd w czasie ekstrakcji audio z wideo (ffmpeg). Kod błędu: {extracting_process}")
+        return -1
     else:
         # update_status("Sukces. Dokonano ekstrakcji audio z wideo.")
         log.success("Skutecznie dokonano ekstrakcji audio z wideo.\n"
                     f"Ścieżka do pliku audio: {filename_and_path}.{audio_ext}")
+        return 0
 
 def transcribe_with_whisper_offline(audio_file_path):
     """Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAi"""
@@ -58,35 +58,26 @@ def transcribe_with_whisper_offline(audio_file_path):
     # update_status("Przygotowanie do transkrypcji audio.")
     filename_and_path, ext = os.path.splitext(audio_file_path)
     filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
+    audio_file_path = audio_file_path.replace("\\", "/")
     log.debug(f"Filename: {filename}  |  Ext: {ext}")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if device == "cuda":
         torch.cuda.init()
-    # update_status(f"Urządzenie na którym zostanie wykonana transkrypcja: {device}")
     log.info(f"Urządzenie na którym zostanie wykonana transkrypcja: {device}")
 
     # tiny, base, small, medium, large, turbo
     model = whisper.load_model("medium").to(device)
-
-    # update_status(f"Wczytanie pliku audio: {filename}{ext}")
-    audio_file_path = audio_file_path.replace("\\", "/")
     audio = whisper.load_audio(audio_file_path)
 
     # update_status("Transkrypcja audio w toku...")
-    transcribed_text = ""
     try:
         with torch.cuda.device(device):
             result = model.transcribe(audio=audio, language="pl", word_timestamps=True)
 
-        # Proste formatowanie tekstu, podział tekstu na kilka linii
-        i = 1
-        for word in result["text"].split(" "):
-            i += 1
-            if i%30 == 0:
-                transcribed_text += f"{word}\n"
-            else:
-                transcribed_text += f"{word} "
+        # Proste formatowanie tekstu
+        transcribed_text = text_formatting(result["text"])
+
         # update_status("Skutecznie dokonano transkrypcji audio.")
         log.success("Skutecznie dokonano transkrypcji audio.")
 
@@ -106,17 +97,16 @@ def transcribe_with_gcloud(audio_file_path):
     # update_status("Przygotowanie do transkrypcji audio.")
     filename_and_path, ext = os.path.splitext(audio_file_path)
     filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
+    audio_file_path = audio_file_path.replace("\\", "/")
     log.debug(f"Filename: {filename}  |  Ext: {ext}")
 
     # Utworzenie obiektu do autoryzacji dostępu do usług Google Cloud
     # Uwaga: Użytkownik sam musi pozyskać plik JSON do autoryzacji w Google Cloud API
-    # update_status("Załadowanie pliku autoryzacyjnego do usług Google Cloud")
+    # update_status("Załadowanie pliku autoryzacyjnego do usług Google Cloud, konfiguracja.")
     client_file = './sa_gc.json'
     credentials = service_account.Credentials.from_service_account_file(client_file)
     client = speech.SpeechClient(credentials=credentials)
 
-    # update_status("Przygotowanie pliku audio, konfiguracja.")
-    audio_file_path = audio_file_path.replace("\\", "/")
     with io.open(audio_file_path, mode="rb") as audio_file:
         content = audio_file.read()
         audio = speech.RecognitionAudio(content=content)
@@ -129,8 +119,6 @@ def transcribe_with_gcloud(audio_file_path):
     )
 
     # update_status("Transkrypcja audio w toku...")
-    i = 1
-    transcribed_text = ""
     try:
         response = client.recognize(config=config, audio=audio)
 
@@ -138,12 +126,9 @@ def transcribe_with_gcloud(audio_file_path):
         for result in response.results:
             transcribed_text_before_formatting = result.alternatives[0].transcript
 
-        for word in transcribed_text_before_formatting.split(" "):
-            i += 1
-            if i%30 == 0:
-                transcribed_text += f"{word}\n"
-            else:
-                transcribed_text += f"{word} "
+        # Proste formatowanie tekstu
+        transcribed_text = text_formatting(transcribed_text_before_formatting)
+
         # update_status("Skutecznie dokonano transkrypcji audio.")
         log.success("Skutecznie dokonano transkrypcji audio.")
 
@@ -154,6 +139,17 @@ def transcribe_with_gcloud(audio_file_path):
         return filename, -1
 
     return filename, transcribed_text
+
+def text_formatting(text):
+    i = 0
+    result = ""
+    for word in text.split(" "):
+        i += 1
+        if i % 30 == 0:
+            result += f"{word}\n"
+        else:
+            result += f"{word} "
+    return result
 
 def save_text_to_txt(filename, transcribed_text):
     """ Zapis przetranskrybowanego tekstu do pliku .txt"""
