@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from recorder import start_recording, stop_recording
+from loguru import logger as log
 
 def update_status(new_status):
     """
@@ -10,13 +11,13 @@ def update_status(new_status):
 
 def generate_notes():
     # Placeholder funkcjonalność generowania notatek
-    print("Generowanie notatek...")
+    log.debug("Generowanie notatek...")
     messagebox.showinfo("Notatki", "Notatki zostały wygenerowane!")
 
 def open_file():
     file_path = filedialog.askopenfilename(title="Wybierz plik")
     if file_path:
-        print(f"Wybrano plik: {file_path}")
+        log.debug(f"Wybrano plik: {file_path}")
         # Dodaj obsługę wczytywania pliku
         # Placeholder
 

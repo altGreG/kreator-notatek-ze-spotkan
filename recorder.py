@@ -3,6 +3,8 @@ import subprocess
 import os
 import signal
 from datetime import datetime
+from loguru import logger as log
+from logger import log_status
 
 recording_process = None  # Zmienna globalna do przechowywania procesu nagrywania
 
@@ -13,7 +15,7 @@ def start_recording(update_status):
     global recording_process
 
     # Wywołanie aktualizacji statusu w GUI
-    update_status("Nagrywanie w toku...")
+    log_status("Nagrywanie w toku...", "info" ,update_status)
 
     system_name = platform.system()
     # Ścieżka do zapisu pliku wideo
@@ -57,15 +59,15 @@ def start_recording(update_status):
             output_file
         ]
     else:
-        update_status(f"Nagrywanie nie jest wspierane na tym systemie: {system_name}")
+        log_status(f"Nagrywanie nie jest wspierane na tym systemie: {system_name}", "critical", update_status)
         return
 
     # Uruchomienie procesu FFmpeg
     try:
         recording_process = subprocess.Popen(ffmpeg_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print(f"Nagrywanie rozpoczęte. Plik zostanie zapisany jako: {output_file}")
+        log.debug(f"Nagrywanie rozpoczęte. Plik zostanie zapisany jako: {output_file}")
     except Exception as e:
-        update_status(f"Błąd podczas rozpoczynania nagrywania: {e}")
+        log_status(f"Błąd podczas rozpoczynania nagrywania: {e}", "error", update_status)
 
 def stop_recording(update_status):
     """
@@ -74,7 +76,7 @@ def stop_recording(update_status):
     global recording_process
 
     # Wywołanie aktualizacji statusu w GUI
-    update_status("Kończenie nagrywania...")
+    log_status("Kończenie nagrywania...", "info", update_status)
 
     system_name = platform.system()
     if system_name in ["Linux", "Windows"]:
@@ -84,12 +86,12 @@ def stop_recording(update_status):
                 recording_process.send_signal(signal.SIGINT)
                 recording_process.wait()
                 update_status("Gotowe")
-                print("Nagrywanie zakończone.")
+                log_status("Nagrywanie zakończone.", "success", update_status)
             except Exception as e:
-                update_status(f"Błąd podczas zakończania nagrywania: {e}")
+                log_status(f"Błąd podczas zakończania nagrywania: {e}", "error", update_status)
             finally:
                 recording_process = None
         else:
-            update_status("Nie znaleziono aktywnego nagrywania.")
+            log_status("Nie znaleziono aktywnego nagrywania.", "warning", update_status)
     else:
-        update_status(f"Nagrywanie nie jest wspierane na tym systemie: {system_name}")
+        log_status(f"Nagrywanie nie jest wspierane na tym systemie: {system_name}", "critical", update_status)
