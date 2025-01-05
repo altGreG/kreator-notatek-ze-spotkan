@@ -6,6 +6,7 @@ import torch
 import io
 from google.oauth2 import service_account
 from google.cloud import speech
+from loguru import logger as log
 
 extracting_process = -1
 
@@ -13,14 +14,15 @@ def extract_audio_from_video(video_file_path):
     """Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`"""
 
 
+    global extracting_process
     system_name = platform.system()
     filename_and_path, ext = os.path.splitext(video_file_path)
     audio_ext = "mp3"
 
     # Ekstracja ścieżki audio z pliku i zapis do mp3
     # update_status("Ekstrakcja audio w toku...")
-    print(f"Rozpoczęto ekstrakcję audio z video. ({system_name})")
-    print(f"Scieżka do pliku video: {video_file_path}")
+    log.info(f"Rozpoczęto ekstrakcję audio z video. ({system_name})\n"
+             f"Scieżka do pliku video: {video_file_path}")
     if system_name == "Windows":
         try:
             # TODO(altGreG): Po testach, usunąć opcję -t z komendy (-t mówi jak długi kawałek nagrania przekonwertować)
@@ -29,7 +31,7 @@ def extract_audio_from_video(video_file_path):
                             stderr=subprocess.STDOUT)
         except Exception as err:
             # update_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
-            print("Wystąpił problem w czasie ekstrakcji audio z video:", err)
+            log.error(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
             return err
     elif system_name == "Linux":
         try:
@@ -38,16 +40,16 @@ def extract_audio_from_video(video_file_path):
                             stderr=subprocess.STDOUT)
         except Exception as err:
             # update_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
-            print("Wystąpił problem w czasie ekstrakcji audio z video:", err)
+            log.error(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}")
             return err
 
     if extracting_process != 0:
         # update_status(f"Błąd w czasie ekstrakcji audio z wideo. Kod błędu: {extracting_process}")
-        print(f"Błąd w czasie ekstrakcji audio z wideo. Kod błędu: {extracting_process}")
+        log.error(f"Błąd w czasie ekstrakcji audio z wideo (ffmpeg). Kod błędu: {extracting_process}")
     else:
         # update_status("Sukces. Dokonano ekstrakcji audio z wideo.")
-        print("Skutecznie dokonano ekstrakcji audio z wideo.")
-        print("Ścieżka do pliku audio:", f"{filename_and_path}.{audio_ext}")
+        log.success("Skutecznie dokonano ekstrakcji audio z wideo.\n"
+                    f"Ścieżka do pliku audio: {filename_and_path}.{audio_ext}")
 
 def transcribe_with_whisper_offline(audio_file_path):
     """Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAi"""
@@ -56,13 +58,13 @@ def transcribe_with_whisper_offline(audio_file_path):
     # update_status("Przygotowanie do transkrypcji audio.")
     filename_and_path, ext = os.path.splitext(audio_file_path)
     filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
-    print("Filename: ", filename, "| Ext: ", ext)
+    log.debug(f"Filename: {filename}  |  Ext: {ext}")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if device == "cuda":
         torch.cuda.init()
     # update_status(f"Urządzenie na którym zostanie wykonana transkrypcja: {device}")
-    print(f"Urządzenie na którym zostanie wykonana transkrypcja: {device}")
+    log.info(f"Urządzenie na którym zostanie wykonana transkrypcja: {device}")
 
     # tiny, base, small, medium, large, turbo
     model = whisper.load_model("medium").to(device)
@@ -86,12 +88,13 @@ def transcribe_with_whisper_offline(audio_file_path):
             else:
                 transcribed_text += f"{word} "
         # update_status("Skutecznie dokonano transkrypcji audio.")
-        print("Skutecznie dokonano transkrypcji audio.")
+        log.success("Skutecznie dokonano transkrypcji audio.")
 
-        print(transcribed_text)
+        print("Przetranskrybowany tekst:\n", transcribed_text)
     except Exception as err:
         # update_status(f"Wystąpił problem w czasie transkrypcji audio: {err}")
-        print("Wystąpił problem w czasie transkrypcji audio:", err)
+        log.error(f"Wystąpił problem w czasie transkrypcji audio: {err}")
+        return filename, -1
 
     return filename, transcribed_text
 
@@ -103,7 +106,7 @@ def transcribe_with_gcloud(audio_file_path):
     # update_status("Przygotowanie do transkrypcji audio.")
     filename_and_path, ext = os.path.splitext(audio_file_path)
     filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
-    print("Filename: ", filename, "| Ext: ", ext)
+    log.debug(f"Filename: {filename}  |  Ext: {ext}")
 
     # Utworzenie obiektu do autoryzacji dostępu do usług Google Cloud
     # Uwaga: Użytkownik sam musi pozyskać plik JSON do autoryzacji w Google Cloud API
@@ -142,12 +145,13 @@ def transcribe_with_gcloud(audio_file_path):
             else:
                 transcribed_text += f"{word} "
         # update_status("Skutecznie dokonano transkrypcji audio.")
-        print("Skutecznie dokonano transkrypcji audio.")
+        log.success("Skutecznie dokonano transkrypcji audio.")
 
-        print(transcribed_text)
+        print("Przetranskrybowany tekst:\n", transcribed_text)
     except Exception as err:
         # update_status(f"Wystąpił problem w czasie transkrypcji audio: {err}")
-        print("Wystąpił problem w czasie transkrypcji audio:", err)
+        log.error(f"Wystąpił problem w czasie transkrypcji audio: {err}")
+        return filename, -1
 
     return filename, transcribed_text
 
@@ -156,12 +160,11 @@ def save_text_to_txt(filename, transcribed_text):
 
 
     # update_status("Przygotowanie do zapisu transkrypcji w pliku txt.")
-
     output_dir = (os.path.dirname(__file__) + "/txt").replace("\\", "/")
     os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
 
     txt_path = (output_dir + f"/{filename}.txt").replace("\\", "/")
-    print("Miejsce zapisu pliku txt:", txt_path )
+    log.info(f"Miejsce zapisu pliku txt: {txt_path}" )
 
     # update_status("Zapis do pliku txt w toku...")
     try:
@@ -170,7 +173,7 @@ def save_text_to_txt(filename, transcribed_text):
             # update_status("Dokonano zapisu tekstu do pliku txt")
     except Exception as err:
         # update_status(f"Wystąpił problem w czasie zapisu do pliku txt: {err}")
-        print("Wystąpił problem w czasie zapisu do pliku txt:", err)
+        log.error(f"Wystąpił problem w czasie zapisu do pliku txt: {err}")
 
 # TODO(altGreG): Przeprowadzić testy
 # Uwaga: Ścieżki i nazwy plików trzeba dostosować pod siebie w czasie testów na własnej maszynie
@@ -186,7 +189,11 @@ def audio_transcribe_gc_test():
 
 # Uwaga: Wywołania funkcji testujących oprogramowanie
 
-# audio_extraction_test()
-# filename, transcribed_text = audio_transcribe_whisper_test()
+audio_extraction_test()
+filename, transcribed_text = audio_transcribe_whisper_test()
 # filename, transcribed_text = audio_transcribe_gc_test()
-# save_text_to_txt(filename, transcribed_text)
+
+if transcribed_text != -1:
+    save_text_to_txt(filename, transcribed_text)
+else:
+    log.critical("Nie udało się wykonać transkrypcji audio. Nie można zapisać transkrypcji do pliku txt.")
