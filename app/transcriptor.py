@@ -12,7 +12,14 @@ from app.logger import log_status
 extracting_process = -1
 
 def extract_audio_from_video(video_file_path, update_status):
-    """Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`"""
+    """
+    Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`
+
+    :param video_file_path: ścieżka do pliku z video
+    :param update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
+
+    :return: ścieżkę do pliku audio lub None
+    """
     global extracting_process
 
     system_name = platform.system()
@@ -32,7 +39,7 @@ def extract_audio_from_video(video_file_path, update_status):
                             stderr=subprocess.STDOUT)
         except Exception as err:
             log_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}", "error", update_status)
-            return -1
+            return None
     elif system_name == "Linux":
         try:
             extracting_process = subprocess.call(["ffmpeg", "-y", "-i", video_file_path, f"{filename_and_path}.{audio_ext}"],
@@ -40,18 +47,25 @@ def extract_audio_from_video(video_file_path, update_status):
                             stderr=subprocess.STDOUT)
         except Exception as err:
             log_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}", "error", update_status)
-            return -1
+            return None
 
     if extracting_process != 0:
         log_status(f"Błąd w czasie ekstrakcji audio z wideo (ffmpeg).\nKod błędu: {extracting_process}", "error", update_status)
-        return -1
+        return None
     else:
         log_status("Sukces. Dokonano ekstrakcji audio z wideo.", "success", update_status)
         log.debug(f"Ścieżka do pliku audio: {filename_and_path}.{audio_ext}")
-        return 0
+        return f"{filename_and_path}.{audio_ext}"
 
 def transcribe_with_whisper_offline(audio_file_path, update_status):
-    """Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAi"""
+    """
+    Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAi
+
+    :param audio_file_path: ścieżka do pliku z audio
+    :param update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
+
+    :return: nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
+    """
 
 
     log_status("Przygotowanie do transkrypcji audio.", "info", update_status)
@@ -67,7 +81,13 @@ def transcribe_with_whisper_offline(audio_file_path, update_status):
 
     # tiny, base, small, medium, large, turbo
     model = whisper.load_model("medium").to(device)
-    audio = whisper.load_audio(audio_file_path)
+    try:
+        audio = whisper.load_audio(audio_file_path)
+        log.debug("Wczytano plik audio do modelu.")
+    except Exception as err:
+        log_status(f"Błąd w czasie wczytywania pliku audio. Sprawdź poprawność ścieżki do pliku.")
+        log.error(f"Błąd: \n {err}")
+        return filename, None
 
     log_status("Transkrypcja audio w toku...", "info", update_status)
     try:
@@ -81,13 +101,20 @@ def transcribe_with_whisper_offline(audio_file_path, update_status):
         print("Przetranskrybowany tekst:\n", transcribed_text)
     except Exception as err:
         log_status(f"Wystąpił problem w czasie transkrypcji audio: {err}", "error", update_status)
-        return filename, -1
+        return filename, None
 
     return filename, transcribed_text
 
 # TODO(altGreG): Na razie program może obsłużyć pliki audio o długości do 1 minuty, do poprawy
 def transcribe_with_gcloud(audio_file_path, update_status):
-    """Transkrypcja audio z wykorzystaniem api do usługi Speech to Text na Google Cloud"""
+    """
+    Transkrypcja audio z wykorzystaniem api do usługi Speech to Text na Google Cloud
+
+    :param audio_file_path: ścieżka do pliku z audio
+    :param update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
+
+    :return: nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
+    """
 
 
     log_status("Przygotowanie do transkrypcji audio.", "info", update_status)
@@ -102,14 +129,25 @@ def transcribe_with_gcloud(audio_file_path, update_status):
     Utworzenie obiektu do autoryzacji dostępu do usług Google Cloud
     Uwaga: Użytkownik sam musi pozyskać plik JSON do autoryzacji w Google Cloud API
     """
-    log_status("Załadowanie pliku autoryzacyjnego do usług Google Cloud, konfiguracja.", "info", update_status)
-    client_file = '../sa_gc.json'
-    credentials = service_account.Credentials.from_service_account_file(client_file)
-    client = speech.SpeechClient(credentials=credentials)
+    try:
+        client_file = '../sa_gc.json'
+        credentials = service_account.Credentials.from_service_account_file(client_file)
+        client = speech.SpeechClient(credentials=credentials)
+        log_status("Załadowanie pliku autoryzacyjnego do usług Google Cloud, konfiguracja.", "info", update_status)
+    except Exception as err:
+        log_status("Brak pliku autoryzacyjnego do usług Google Cloud, brak dostępu.", "error", update_status)
+        log.error(f"Błąd: {err}")
+        return filename, None
 
-    with io.open(audio_file_path, mode="rb") as audio_file:
-        content = audio_file.read()
-        audio = speech.RecognitionAudio(content=content)
+    try:
+        with io.open(audio_file_path, mode="rb") as audio_file:
+            content = audio_file.read()
+            audio = speech.RecognitionAudio(content=content)
+        log.debug("Wczytano plik audio.")
+    except Exception as err:
+        log_status(f"Błąd w czasie wczytywania pliku audio.", "error", update_status)
+        log.error(f"Błąd: {err}")
+        return filename, None
 
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.MP3,
@@ -133,13 +171,18 @@ def transcribe_with_gcloud(audio_file_path, update_status):
         print("Przetranskrybowany tekst:\n", transcribed_text)
     except Exception as err:
         log_status(f"Wystąpił problem w czasie transkrypcji audio: {err}", "error", update_status)
-        return filename, -1
+        return filename, None
 
     return filename, transcribed_text
 
 def text_formatting(text):
-    """ Formatowanie tekstu by każda linijka tekstu zajmowała maksymalnie 30 słów"""
-    i = 0
+    """
+    Formatowanie tekstu by każda linijka tekstu zajmowała maksymalnie 30 słów
+
+    :param text: tekst do sformatowania
+    :return: sformatowany tekst
+    """
+    i = 1
     result = ""
     for word in text.split(" "):
         i += 1
@@ -148,53 +191,3 @@ def text_formatting(text):
         else:
             result += f"{word} "
     return result
-
-def save_text_to_txt(filename, transcribed_text, update_status):
-    """ Zapis przetranskrybowanego tekstu do pliku .txt"""
-
-
-    log_status("Przygotowanie do zapisu transkrypcji w pliku txt.", "info", update_status)
-    output_dir = (os.path.dirname(__file__) + "/txt").replace("\\", "/")
-    os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
-
-    txt_path = (output_dir + f"/{filename}.txt").replace("\\", "/")
-    log.debug(f"Miejsce zapisu pliku txt: {txt_path}", "info", update_status )
-
-    log_status("Zapis do pliku txt w toku...", "info", update_status)
-    try:
-        with open(txt_path, 'w', encoding='utf-8') as file:
-            file.write(transcribed_text, )
-            log_status("Dokonano zapisu tekstu do pliku txt", "success", update_status)
-    except Exception as err:
-        log_status(f"Wystąpił problem w czasie zapisu do pliku txt: {err}", "error", update_status)
-
-
-# TODO(altGreG): Przeprowadzić testy
-
-
-# Uwaga: Ścieżki i nazwy plików trzeba dostosować pod siebie w czasie testów na własnej maszynie
-def audio_extraction_test():
-    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\app\nagrania\test.mkv"
-    update_status = "placeholder"
-    extract_audio_from_video(s, update_status)
-
-def audio_transcribe_whisper_test():
-    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\app\nagrania\audio\test.mp3"
-    update_status = "placeholder"
-    return transcribe_with_whisper_offline(s, update_status)
-
-def audio_transcribe_gc_test():
-    s = r"D:\Studia\InzynieriaOprogramowania\kreator-notatek-ze-spotkan\app\nagrania\audio\test.mp3"
-    update_status = "placeholder"
-    return transcribe_with_gcloud(s, update_status)
-
-# Uwaga: Wywołania funkcji testujących oprogramowanie
-audio_extraction_test()
-# filename, transcribed_text = audio_transcribe_whisper_test()
-filename, transcribed_text = audio_transcribe_gc_test()
-
-if transcribed_text != -1:
-    update_status = "placeholder"
-    save_text_to_txt(filename, transcribed_text, update_status)
-else:
-    log.critical("Nie udało się wykonać transkrypcji audio. Nie można zapisać transkrypcji do pliku txt.")
