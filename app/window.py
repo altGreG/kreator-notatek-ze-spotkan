@@ -69,7 +69,7 @@ app = tk.Tk()
 app.title("Aplikacja do Nagrywania Spotkań")
 app.resizable(False, False)
 app.geometry("600x400")
-app.configure(bg="#666297")  # Fioletowe tło
+app.configure(bg="#ebe4d6")
 
 # Funkcja do animowanego rozwijania i zwijania przycisków
 def animate_buttons(buttons, target_positions, duration=200, step=10):
@@ -135,8 +135,8 @@ def create_circle_button(parent, x, y, size, text, fill_color, outline_color, co
         compound="center",
         font=("Arial", 12),
         fg="black",
-        bg="#666297",  # Kolor tła zgodny z aplikacją
-        activebackground="#666297",  # Tło w stanie aktywnym
+        bg="#ebe4d6",  # Kolor tła zgodny z aplikacją
+        activebackground="#ebe4d6",  # Tło w stanie aktywnym
         highlightthickness=0,  # Usunięcie obramowania
         bd=0,  # Brak ramki
         command=command
@@ -151,22 +151,22 @@ def create_main_menu(canvas, app):
     buttons = []
 
     # Dodanie przycisku "Plik"
-    file_button = create_circle_button(app, x=0, y=0, size=40, text="📂", fill_color="#a9a1eb",
+    file_button = create_circle_button(app, x=0, y=0, size=40, text="📂", fill_color="#ad9d99",
                                        outline_color="black", command=lambda:open_file_menu(file_button))
     buttons.append(file_button)
 
     # Dodanie przycisku "Ustawienia"
-    settings_button = create_circle_button(app, x=0, y=0, size=40, text="⚙", fill_color="#a9a1eb",
+    settings_button = create_circle_button(app, x=0, y=0, size=40, text="⚙", fill_color="#ad9d99",
                                            outline_color="black", command=show_settings)
     buttons.append(settings_button)
 
     # Dodanie przycisku "Pomoc"
-    help_button = create_circle_button(app, x=0, y=0, size=40, text="?", fill_color="#a9a1eb",
+    help_button = create_circle_button(app, x=0, y=0, size=40, text="?", fill_color="#ad9d99",
                                        outline_color="black", command=show_help)
     buttons.append(help_button)
 
     # Dodanie przycisku "Wyjdź"
-    exit_button = create_circle_button(app, x=0, y=0, size=40, text="✖", fill_color="#a9a1eb",
+    exit_button = create_circle_button(app, x=0, y=0, size=40, text="✖", fill_color="#ad9d99",
                                        outline_color="black", command=app.quit)
     buttons.append(exit_button)
 
@@ -175,7 +175,7 @@ def create_main_menu(canvas, app):
         button.place_forget()
 
     # Główny przycisk menu
-    main_menu_button = create_circle_button(app, x=10, y=10, size=40, text="☰", fill_color="#a9a1eb",
+    main_menu_button = create_circle_button(app, x=10, y=10, size=40, text="☰", fill_color="#ad9d99",
                                             outline_color="black",
                                             command=lambda: toggle_menu_buttons(canvas, main_menu_button, buttons))
     return main_menu_button, buttons
@@ -198,7 +198,7 @@ def open_file_menu(file_button):
 
 
 # Tworzenie płótna dla przycisku menu (niepotrzebne w tej wersji, ale zostaje)
-canvas = tk.Canvas(app, width=50, height=50, bg="#666297", highlightthickness=0)
+canvas = tk.Canvas(app, width=50, height=50, bg="#ebe4d6", highlightthickness=0)
 canvas.place(x=1, y=1)
 
 # Tworzenie głównego menu z rozwijanymi przyciskami
@@ -208,13 +208,13 @@ create_main_menu(canvas, app)
 open_sans_font = (font_path, 24)
 
 # Tworzenie widżetu status_label
-status_label = tk.Label(app, bg="#666297")
+status_label = tk.Label(app, bg="#ebe4d6")
 status_label.place(relx=0.5, y=80, anchor="center")  # Wyśrodkowanie względem okna
 # Ustawienie początkowego statusu
 update_status("Gotowe")
 
 # Przyciski
-button_frame = tk.Frame(app, bg="#666297")
+button_frame = tk.Frame(app, bg="#ebe4d6")
 button_frame.place(relx=0.5, y=160, anchor="center")
 
 
@@ -225,7 +225,7 @@ start_button = create_circle_button(
     y=0,
     size=60,
     text="▶",
-    fill_color="#a9a1eb",
+    fill_color="#ad9d99",
     outline_color="black",
     command=lambda: start_recording(update_status)
 )
@@ -239,7 +239,7 @@ stop_button = create_circle_button(
     y=0,
     size=60,
     text="◼",
-    fill_color="#a9a1eb",
+    fill_color="#ad9d99",
     outline_color="black",
     command=lambda: stop_recording(update_status)
 )
@@ -253,7 +253,7 @@ show_transcription_button = create_circle_button(
     y=0,
     size=60,
     text="📄",
-    fill_color="#a9a1eb",
+    fill_color="#ad9d99",
     outline_color="black",
     command=toggle_transcription
 )
@@ -267,14 +267,14 @@ notes_button = create_circle_button(
     y=0,
     size=60,
     text="✎",
-    fill_color="#a9a1eb",
+    fill_color="#ad9d99",
     outline_color="black",
     command=generate_notes
 )
 notes_button.config(font=("Arial", 24))
 notes_button.grid(row=0, column=3, padx=10)
 # Tworzenie ramki dla transkrypcji
-transcription_frame = tk.Frame(app, bg="#a9a1eb", highlightbackground="black", highlightthickness=2)
+transcription_frame = tk.Frame(app, bg="#ad9d99", highlightbackground="black", highlightthickness=2)
 
 transcription_text = tk.Text(
     transcription_frame,
