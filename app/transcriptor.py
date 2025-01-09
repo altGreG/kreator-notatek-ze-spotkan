@@ -1,3 +1,5 @@
+# app/transcriptor.py
+
 """Narzędzia transkrypcji audio
 
 Ten skrypt pozwala użytkownikowi na transkrypcję plików audio do plików tekstowych.
@@ -40,16 +42,16 @@ from app.logger import log_status
 
 extracting_process = -1
 
-def extract_audio_from_video(video_file_path, update_status):
+def extract_audio_from_video(video_file_path: str, update_status: any) -> str | None:
     """
     Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`
 
     Args:
-        video_file_path (str): ścieżka do pliku z video
-        update_status (any): metoda aplikacji gui (aktualizacja wiadomości statusu)
+        video_file_path: ścieżka do pliku z video
+        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
 
     Returns:
-        str | None: ścieżkę do pliku audio lub None
+        ścieżka do pliku audio | None w razie błędu
     """
     global extracting_process
 
@@ -88,16 +90,16 @@ def extract_audio_from_video(video_file_path, update_status):
         log.debug(f"Ścieżka do pliku audio: {filename_and_path}.{audio_ext}")
         return f"{filename_and_path}.{audio_ext}"
 
-def transcribe_with_whisper_offline(audio_file_path, update_status):
+def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) -> tuple[str, str | None]:
     """
     Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAI
 
     Args:
-        audio_file_path (str): ścieżka do pliku z audio
-        update_status (any): metoda aplikacji gui (aktualizacja wiadomości statusu)
+        audio_file_path: ścieżka do pliku z audio
+        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
 
     Returns:
-        (str, str | None): nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
+        nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst | nazwa pliku i None w razie błędu
     """
 
 
@@ -139,16 +141,16 @@ def transcribe_with_whisper_offline(audio_file_path, update_status):
     return filename, transcribed_text
 
 # TODO(altGreG): Na razie program może obsłużyć pliki audio o długości do 1 minuty, do poprawy
-def transcribe_with_gcloud(audio_file_path, update_status):
+def transcribe_with_gcloud(audio_file_path: str, update_status: any) -> tuple[str, str | None]:
     """
     Transkrypcja audio z wykorzystaniem API do usługi Speech to Text na Google Cloud
 
     Args:
-        audio_file_path (str): ścieżka do pliku z audio
-        update_status (any): metoda aplikacji gui (aktualizacja wiadomości statusu)
+        audio_file_path: ścieżka do pliku z audio
+        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
 
     Returns:
-        (str, str | None): nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
+        nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst | nazwa pliku i None w razie błędu
     """
 
 
@@ -210,17 +212,17 @@ def transcribe_with_gcloud(audio_file_path, update_status):
 
     return filename, transcribed_text
 
-def text_formatting(text):
+def text_formatting(text: str) -> str:
     """
     Formatowanie tekstu
 
     Transformacja tekstu w taki sposób, by każda linijka tekstu zajmowała maksymalnie 30 słów.
 
     Args:
-        text (str): tekst do sformatowania
+        text: tekst do sformatowania
 
     Returns:
-        str: sformatowany tekst
+        sformatowany tekst
     """
     i = 1
     result = ""
