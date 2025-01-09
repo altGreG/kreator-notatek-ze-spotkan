@@ -1,4 +1,4 @@
-# app/transcriptor.py
+# app/recorder.py
 
 """Narzędzia nagrywania audio i wideo z komputera
 
