@@ -9,6 +9,7 @@ pip install virtualenv
 python3 -m venv venv
 source venv/bin/activate
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+python -m pip install "mkdocstrings[python]"
 
 pip install -r requirements.txt
 # or
@@ -19,8 +20,10 @@ pip install openai
 pip install google-cloud-speech
 pip install protobuf
 pip install loguru
+python -m pip install mkdocs
+python -m pip install mkdocs-material
 
-
+python -m pip list
 ```
 ---
 ### Windows
@@ -41,6 +44,8 @@ pip install virtualenv
 python -m venv env
 env\Scripts\activate
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+python -m pip install "mkdocstrings[python]"
+
 
 pip install -r requirements.txt
 # or
@@ -51,6 +56,10 @@ pip install openai
 pip install google-cloud-speech
 pip install protobuf
 pip install loguru
+python -m pip install mkdocs
+python -m pip install mkdocs-material
+
+python -m pip list
 ```
 ---
 

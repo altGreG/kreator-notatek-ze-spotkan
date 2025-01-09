@@ -1,3 +1,28 @@
+# app/recorder.py
+
+"""Narzędzia nagrywania audio i wideo z komputera
+
+Ten skrypt pozwala użytkownikowi na nagrywanie audio i wideo z komputera przy
+pomocy oprogramowania ffmpeg.
+
+Skrypt wymaga aby w środowisku Pythona w którym uruchamiasz ten skrypt zostały
+zainstalowane następujące zależności:
+
+    - `loguru`
+
+Do poprawnego działania skryptu należy zaimportować następujące funkcje:
+
+    - `log_status` z modułu app.loger
+
+W systemie musi być zainstalowane oprogramowanie `ffmpeg`, ścieżka do folderu z plikiem ffmpeg.exe
+musi zostać ustawiona w zmiennych środowiskowych systemu (Windows) lub dodana do zmiennej PATH (Linux)
+
+Ten plik może zostać zaimportowany również jako moduł i zawiera następujące funkcje:
+
+    * start_recording - rozpoczyna nagrywanie audio i wideo
+    * stop_recording - kończy nagrywanie, zapisuje plik mp4 w folderze nagrania
+"""
+
 import platform
 import subprocess
 import os
@@ -8,9 +33,12 @@ from app.logger import log_status
 
 recording_process = None  # Zmienna globalna do przechowywania procesu nagrywania
 
-def start_recording(update_status):
+def start_recording(update_status: any) -> None:
     """
     Funkcja rozpoczynająca nagrywanie ekranu i dźwięku Dla linuxa i Windowsa.
+
+    Args:
+        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
     """
     global recording_process
 
@@ -69,9 +97,12 @@ def start_recording(update_status):
     except Exception as e:
         log_status(f"Błąd podczas rozpoczynania nagrywania: {e}", "error", update_status)
 
-def stop_recording(update_status):
+def stop_recording(update_status: any) -> None:
     """
     Funkcja kończąca nagrywanie ekranu i dźwięku.
+
+    Args:
+        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
     """
     global recording_process
 

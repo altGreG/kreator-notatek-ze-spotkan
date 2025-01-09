@@ -1,0 +1,14 @@
+# mkdocs.yml
+site_name: Projekt IO (KNZS) - Dokumentacja
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings
+
+
+nav:
+  - Strona Główna: index.md
+  - Konfiguracja: configuration.md
+  - Referencja: reference.md
