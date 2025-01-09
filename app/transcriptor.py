@@ -1,3 +1,32 @@
+"""Narzędzia transkrypcji audio
+
+Ten skrypt pozwala użytkownikowi na transkrypcję plików audio do plików tekstowych.
+
+Skrypt wymaga aby w środowisku Pythona w którym uruchamiasz ten skrypt zostały
+zainstalowane następujące zależności:
+
+    - `openai-whisper`
+    - `torch`
+    - `torchvision`
+    - `torchaudio`
+    - `google-cloud-speech`
+    - `protobuf`
+    - `loguru`
+    - setuptools-rust
+
+Do poprawnego działania skryptu należy zaimportować następujące funkcje:
+
+    - `log_status` z modułu app.loger
+
+Ten plik może zostać zaimportowany również jako moduł i zawiera następujące funkcje:
+
+    * extract_audio_from_video - ekstrakcja audio z video
+    * transcribe_with_whisper_offline - transkrypcja audio z modelem Whisper na maszynie użytkownika
+    * transcribe_with_gcloud - transkrypcja audio w chmurze Google Cloud i usługu Speech To Text
+    * text_formatting - formatowanie tekstu, by linijka zawierała maksymalnie 30 słów
+"""
+
+
 import platform
 import subprocess
 import os
@@ -15,10 +44,12 @@ def extract_audio_from_video(video_file_path, update_status):
     """
     Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`
 
-    :param video_file_path: ścieżka do pliku z video
-    :param update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
+    Args:
+        video_file_path (str): ścieżka do pliku z video
+        update_status (any): metoda aplikacji gui (aktualizacja wiadomości statusu)
 
-    :return: ścieżkę do pliku audio lub None
+    Returns:
+        str | None: ścieżkę do pliku audio lub None
     """
     global extracting_process
 
@@ -59,12 +90,14 @@ def extract_audio_from_video(video_file_path, update_status):
 
 def transcribe_with_whisper_offline(audio_file_path, update_status):
     """
-    Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAi
+    Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAI
 
-    :param audio_file_path: ścieżka do pliku z audio
-    :param update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
+    Args:
+        audio_file_path (str): ścieżka do pliku z audio
+        update_status (any): metoda aplikacji gui (aktualizacja wiadomości statusu)
 
-    :return: nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
+    Returns:
+        (str, str | None): nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
     """
 
 
@@ -108,12 +141,14 @@ def transcribe_with_whisper_offline(audio_file_path, update_status):
 # TODO(altGreG): Na razie program może obsłużyć pliki audio o długości do 1 minuty, do poprawy
 def transcribe_with_gcloud(audio_file_path, update_status):
     """
-    Transkrypcja audio z wykorzystaniem api do usługi Speech to Text na Google Cloud
+    Transkrypcja audio z wykorzystaniem API do usługi Speech to Text na Google Cloud
 
-    :param audio_file_path: ścieżka do pliku z audio
-    :param update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
+    Args:
+        audio_file_path (str): ścieżka do pliku z audio
+        update_status (any): metoda aplikacji gui (aktualizacja wiadomości statusu)
 
-    :return: nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
+    Returns:
+        (str, str | None): nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst lub nazwa pliku i None
     """
 
 
@@ -177,10 +212,15 @@ def transcribe_with_gcloud(audio_file_path, update_status):
 
 def text_formatting(text):
     """
-    Formatowanie tekstu by każda linijka tekstu zajmowała maksymalnie 30 słów
+    Formatowanie tekstu
 
-    :param text: tekst do sformatowania
-    :return: sformatowany tekst
+    Transformacja tekstu w taki sposób, by każda linijka tekstu zajmowała maksymalnie 30 słów.
+
+    Args:
+        text (str): tekst do sformatowania
+
+    Returns:
+        str: sformatowany tekst
     """
     i = 1
     result = ""
