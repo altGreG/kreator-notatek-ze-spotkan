@@ -67,6 +67,7 @@ def toggle_transcription():
 # Tworzenie głównego okna aplikacji
 app = tk.Tk()
 app.title("Aplikacja do Nagrywania Spotkań")
+app.resizable(False, False)
 app.geometry("600x400")
 app.configure(bg="#666297")  # Fioletowe tło
 
@@ -275,7 +276,14 @@ notes_button.grid(row=0, column=3, padx=10)
 # Tworzenie ramki dla transkrypcji
 transcription_frame = tk.Frame(app, bg="#a9a1eb", highlightbackground="black", highlightthickness=2)
 
-transcription_text = tk.Text(transcription_frame, bg="white", fg="black", font=("Arial", 12), relief=tk.FLAT)
+transcription_text = tk.Text(
+    transcription_frame,
+    bg="white",
+    fg="black",
+    font=("Arial", 12),  # Czcionka dla tekstu w transkrypcji
+    relief=tk.FLAT,  # Brak obramowania tekstowego
+    state="disabled"  # Ustawienie pola jako tylko do odczytu
+)
 transcription_text.place(relx=0, rely=0, relwidth=1, relheight=1)
 
 # Funkcja do pokazywania/ukrywania transkrypcji
@@ -290,6 +298,11 @@ show_transcription_button.config(command=toggle_transcription)
 
 # Ukrycie ramki transkrypcji na starcie
 transcription_frame.place_forget()
+
+def update_transcription(text):
+    transcription_text.config(state="normal")  # Odblokuj pole
+    transcription_text.insert("end", text + "\n")  # Dodaj tekst
+    transcription_text.config(state="disabled")  # Zablokuj pole
 
 # Uruchomienie aplikacji
 app.mainloop()
