@@ -1,31 +1,73 @@
+# app/window.py
+
+"""Aplikacj GUI, trzon programu.
+
+Główny skrypt w paczce, zawiera definicje i implementacje metod aplikacji GUI naszego programu.
+
+Skrypt wymaga aby w środowisku Pythona w którym uruchamiasz ten skrypt zostały
+zainstalowane następujące zależności:
+
+    - `tkinter`
+    - `loguru`
+
+Do poprawnego działania skryptu należy zaimportować następujące funkcje:
+
+    - `start_recording`,`stop_recording` z modułu app.recorder
+
+Ten plik zawiera następujące funkcje:
+
+    * update_status - aktualizuje wiadomość statusu w gui
+    * generate_notes - zaczyna proces generowania notatek
+    * open_file - pozwala na wczytanie pliku mp4
+    * show_settings - włącza widok okna ustawień w gui
+    * show_help - włącza widok okna z pomocą w gui
+"""
+
+# TODO(altGreG): Zaktualizować docstrings
+
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from app.recorder import start_recording, stop_recording
 from loguru import logger as log
 
-def update_status(new_status):
+def update_status(new_status: str) -> None:
     """
     Aktualizuje tekst widżetu statusu.
+
+    Args:
+        new_status: tekst do wyświetlenia w oknie statusu
     """
     status_label.config(text=f"Status: {new_status}")
 
-def generate_notes():
+def generate_notes() -> None:
+    """
+    Uruchamia proces generowania notatek.
+    """
     # Placeholder funkcjonalność generowania notatek
     log.debug("Generowanie notatek...")
     messagebox.showinfo("Notatki", "Notatki zostały wygenerowane!")
 
-def open_file():
+def open_file() -> None:
+    """
+    Pozwala na pobranie ścieżki do pliku mp4 wybranego w eksploratorze plików.
+    """
     file_path = filedialog.askopenfilename(title="Wybierz plik")
     if file_path:
         log.debug(f"Wybrano plik: {file_path}")
         # Dodaj obsługę wczytywania pliku
         # Placeholder
 
-def show_settings():
+def show_settings() -> None:
+    """
+    Włącza widoczność okna z ustawieniami programu.
+    """
     # Placeholder okno ustawień
     messagebox.showinfo("Ustawienia", "Ustawienia aplikacji.")
 
-def show_help():
+def show_help() -> None:
+    """
+    Włącza widoczność okna z informacjami jak korzystać z programu.
+    """
     # Placeholder okno pomocy
     messagebox.showinfo("Pomoc", "Pomoc aplikacji.")
 
