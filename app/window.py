@@ -1,3 +1,30 @@
+# app/window.py
+
+"""Aplikacj GUI, trzon programu.
+
+Główny skrypt w paczce, zawiera definicje i implementacje metod aplikacji GUI naszego programu.
+
+Skrypt wymaga aby w środowisku Pythona w którym uruchamiasz ten skrypt zostały
+zainstalowane następujące zależności:
+
+    - `tkinter`
+    - `loguru`
+
+Do poprawnego działania skryptu należy zaimportować następujące funkcje:
+
+    - `start_recording`,`stop_recording` z modułu app.recorder
+
+Ten plik zawiera następujące funkcje:
+
+    * update_status - aktualizuje wiadomość statusu w gui
+    * generate_notes - zaczyna proces generowania notatek
+    * open_file - pozwala na wczytanie pliku mp4
+    * show_settings - włącza widok okna ustawień w gui
+    * show_help - włącza widok okna z pomocą w gui
+"""
+
+# TODO(altGreG): Zaktualizować docstrings
+
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from recorder_audio import start_recording, stop_recording
@@ -12,9 +39,12 @@ selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
 if not os.path.exists(font_path):
     raise FileNotFoundError(f"Plik czcionki nie został znaleziony: {font_path}")
 
-def update_status(new_status):
+def update_status(new_status: str) -> None:
     """
-    Aktualizuje tekst widżetu statusu i wyśrodkowuje go.
+    Aktualizuje tekst widżetu statusu.
+
+    Args:
+        new_status: tekst do wyświetlenia w oknie statusu
     """
     font_size = 24
     font = ImageFont.truetype(font_path, font_size)
@@ -39,12 +69,18 @@ def update_status(new_status):
     status_label.config(image=tk_image)
     status_label.image = tk_image
 
-def generate_notes():
+def generate_notes() -> None:
+    """
+    Uruchamia proces generowania notatek.
+    """
     # Placeholder funkcjonalność generowania notatek
     log.debug("Generowanie notatek...")
     messagebox.showinfo("Notatki", "Notatki zostały wygenerowane!")
 
-def open_file():
+def open_file() -> None:
+    """
+    Pozwala na pobranie ścieżki do pliku mp4 wybranego w eksploratorze plików.
+    """
     file_path = filedialog.askopenfilename(title="Wybierz plik")
     if file_path:
         log.debug(f"Wybrano plik: {file_path}")
@@ -96,7 +132,10 @@ def show_settings():
     # Przycisk zapisu ustawień
     tk.Button(settings_window, text="Zapisz", command=save_settings, bg="#ad9d99", fg="white", font=("Arial", 12)).pack(pady=20)
 
-def show_help():
+def show_help() -> None:
+    """
+    Włącza widoczność okna z informacjami jak korzystać z programu.
+    """
     # Placeholder okno pomocy
     messagebox.showinfo("Pomoc", "Pomoc aplikacji.")
 
