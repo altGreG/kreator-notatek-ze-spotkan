@@ -228,7 +228,7 @@ main_menu_button, buttons = create_main_menu(None, app)
 # Tworzenie menu Plik (z rozwijaną listą opcji)
 def open_file_menu(file_button):
     file_menu = tk.Menu(app, tearoff=0)
-    file_menu.add_command(label="Nowe nagranie", command=lambda: start_recording(update_status))
+    file_menu.add_command(label="Nowe nagranie", command=lambda: start_recording(update_status, selected_audio_device))
     file_menu.add_command(label="Otwórz...", command=open_file)
 
     # Pobranie współrzędnych przycisku "Plik"
@@ -269,7 +269,7 @@ start_button = create_circle_button(
     text="▶",
     fill_color="#ad9d99",
     outline_color="black",
-    command=lambda: start_recording(update_status)
+    command=lambda: start_recording(update_status, selected_audio_device)
 )
 start_button.config(font=("Arial", 24))
 start_button.grid(row=0, column=0, padx=10)

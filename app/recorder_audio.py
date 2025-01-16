@@ -9,14 +9,14 @@ from loguru import logger as log
 
 recording_process = None  # Zmienna globalna do przechowywania procesu nagrywania
 
-def start_recording(update_status):
+def start_recording(update_status, selected_audio_device):
     """
     Funkcja rozpoczynająca nagrywanie dźwięku z wybranego urządzenia.
     """
     global recording_process
-
-    if not selected_audio_device:
+    if selected_audio_device is None:
         messagebox.showerror("Błąd", "Nie wybrano urządzenia audio. Skonfiguruj ustawienia.")
+        log.warning("Nie wybrano urządzenia audio. Skonfiguruj ustawienia.")
         return
 
     if update_status:
