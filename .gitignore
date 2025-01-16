@@ -164,3 +164,5 @@ cython_debug/
 nagrania/
 txt/
 sa_gc.json
+screenshots/
+nagrania_audio/

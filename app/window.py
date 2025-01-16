@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
-from recorder import start_recording, stop_recording
+from recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
 import os  # Do obsługi ścieżek plików
+import subprocess
 
 # Ścieżka do pliku czcionki Open Sans
-font_path = r"C:\Users\zrota\PycharmProjects\kreator-notatek-ze-spotkan\kreator-notatek-ze-spotkan\app\OpenSans-ExtraBoldItalic.ttf"
-
+font_path = r".\OpenSans-ExtraBoldItalic.ttf"
+selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
 if not os.path.exists(font_path):
     raise FileNotFoundError(f"Plik czcionki nie został znaleziony: {font_path}")
 
@@ -50,9 +51,50 @@ def open_file():
         # Dodaj obsługę wczytywania pliku
         # Placeholder
 
+selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
+
 def show_settings():
-    # Placeholder okno ustawień
-    messagebox.showinfo("Ustawienia", "Ustawienia aplikacji.")
+    """
+    Wyświetla okno ustawień, w którym użytkownik może wybrać urządzenie audio.
+    """
+    global selected_audio_device
+
+    # Tworzenie okna ustawień
+    settings_window = tk.Toplevel(app)
+    settings_window.title("Ustawienia")
+    settings_window.geometry("400x300")
+    settings_window.configure(bg="#ebe4d6")
+
+    tk.Label(settings_window, text="Wybierz urządzenie audio:", bg="#ebe4d6", font=("Arial", 12)).pack(pady=10)
+
+    # Pobierz listę urządzeń audio
+    devices = get_audio_devices()
+    if not devices:
+        tk.Label(settings_window, text="Brak dostępnych urządzeń audio.", bg="#ebe4d6", fg="red").pack()
+        return
+
+    # Pole wyboru urządzenia audio
+    device_var = tk.StringVar(value=selected_audio_device)
+
+    for device in devices:
+        tk.Radiobutton(
+            settings_window,
+            text=device,
+            variable=device_var,
+            value=device,
+            bg="#ebe4d6",
+            font=("Arial", 10)
+        ).pack(anchor="w", padx=20)
+
+    def save_settings():
+        nonlocal device_var
+        global selected_audio_device
+        selected_audio_device = device_var.get()
+        log.debug(f"Wybrane urządzenie audio: {selected_audio_device}")
+        settings_window.destroy()
+
+    # Przycisk zapisu ustawień
+    tk.Button(settings_window, text="Zapisz", command=save_settings, bg="#ad9d99", fg="white", font=("Arial", 12)).pack(pady=20)
 
 def show_help():
     # Placeholder okno pomocy
@@ -303,6 +345,29 @@ def update_transcription(text):
     transcription_text.config(state="normal")  # Odblokuj pole
     transcription_text.insert("end", text + "\n")  # Dodaj tekst
     transcription_text.config(state="disabled")  # Zablokuj pole
+
+def get_audio_devices():
+    """
+    Pobiera listę dostępnych urządzeń audio za pomocą FFmpeg.
+    """
+    try:
+        result = subprocess.run(
+            ["ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"],
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True
+        )
+        devices = []
+        for line in result.stderr.splitlines():
+            if "(audio)" in line:
+                # Wyodrębnij nazwę urządzenia
+                device = line.split('"')[1]
+                devices.append(device)
+        return devices
+    except Exception as e:
+        log.error(f"Błąd podczas pobierania urządzeń audio: {e}")
+        return []
+
 
 # Uruchomienie aplikacji
 app.mainloop()
