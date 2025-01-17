@@ -14,16 +14,13 @@ def save_text_to_txt(filename, transcribed_text, update_status):
     """
 
 
-    log_status("Przygotowanie do zapisu transkrypcji w pliku txt.", "info", update_status)
     output_dir = (os.path.dirname(__file__) + "/txt").replace("\\", "/")
     os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
 
     txt_path = (output_dir + f"/{filename}.txt").replace("\\", "/")
-    log.debug(f"Miejsce zapisu pliku txt: {txt_path}", "info", update_status )
 
-    log_status("Zapis do pliku txt w toku...", "info", update_status)
     try:
-        with open(txt_path, 'w', encoding='utf-8') as file:
+        with open(txt_path, 'a', encoding='utf-8') as file:
             file.write(transcribed_text, )
             log_status("Dokonano zapisu tekstu do pliku txt", "success", update_status)
             return txt_path
