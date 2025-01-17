@@ -27,11 +27,16 @@ Ten plik zawiera następujące funkcje:
 
 import tkinter as tk
 from tkinter import messagebox, filedialog
+
+from app.start_recording_and_screenshots import start_recording_and_screenshots, stop_recording_and_screenshots
 from recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
 import os  # Do obsługi ścieżek plików
 import subprocess
+
+
+
 
 # Ścieżka do pliku czcionki Open Sans
 font_path = r".\styles\OpenSans-ExtraBoldItalic.ttf"
@@ -39,35 +44,37 @@ selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
 if not os.path.exists(font_path):
     raise FileNotFoundError(f"Plik czcionki nie został znaleziony: {font_path}")
 
-def update_status(new_status: str) -> None:
+def update_status(new_status):
     """
-    Aktualizuje tekst widżetu statusu.
-
-    Args:
-        new_status: tekst do wyświetlenia w oknie statusu
+    Aktualizuje tekst widżetu statusu i wyśrodkowuje go.
     """
-    font_size = 24
-    font = ImageFont.truetype(font_path, font_size)
-    text = f"Status: {new_status}"
+    def update_label():
+        font_size = 24
+        font = ImageFont.truetype(font_path, font_size)
+        text = f"Status: {new_status}"
 
-    # Obliczamy wymiary tekstu
-    text_bbox = font.getbbox(text)
-    text_width, text_height = text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1]
-    img_width, img_height = 600, 50  # Wymiary obrazu dopasowane do aplikacji
-    img = Image.new("RGBA", (img_width, img_height), (102, 98, 151, 0))
-    draw = ImageDraw.Draw(img)
+        # Obliczamy wymiary tekstu
+        text_bbox = font.getbbox(text)
+        text_width, text_height = text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1]
+        img_width, img_height = 600, 50  # Wymiary obrazu dopasowane do aplikacji
+        img = Image.new("RGBA", (img_width, img_height), (102, 98, 151, 0))
+        draw = ImageDraw.Draw(img)
 
-    # Rysujemy tekst na środku obrazu
-    x = (img_width - text_width) // 2
-    y = (img_height - text_height) // 2
-    draw.text((x, y), text, font=font, fill="black")
+        # Rysujemy tekst na środku obrazu
+        x = (img_width - text_width) // 2
+        y = (img_height - text_height) // 2
+        draw.text((x, y), text, font=font, fill="black")
 
-    # Konwertujemy obraz na format zgodny z tkinter
-    tk_image = ImageTk.PhotoImage(img)
+        # Konwertujemy obraz na format zgodny z tkinter
+        tk_image = ImageTk.PhotoImage(img)
 
-    # Ustawiamy obraz w widżecie status_label
-    status_label.config(image=tk_image)
-    status_label.image = tk_image
+        # Ustawiamy obraz w widżecie status_label
+        status_label.config(image=tk_image)
+        status_label.image = tk_image
+
+    # Wykonaj aktualizację w głównym wątku
+    app.after(0, update_label)
+
 
 def generate_notes() -> None:
     """
@@ -308,7 +315,7 @@ start_button = create_circle_button(
     text="▶",
     fill_color="#ad9d99",
     outline_color="black",
-    command=lambda: start_recording(update_status, selected_audio_device)
+    command=lambda: start_recording_and_screenshots(update_status, selected_audio_device, app)
 )
 start_button.config(font=("Arial", 24))
 start_button.grid(row=0, column=0, padx=10)
@@ -322,7 +329,7 @@ stop_button = create_circle_button(
     text="◼",
     fill_color="#ad9d99",
     outline_color="black",
-    command=lambda: stop_recording(update_status)
+    command=lambda: stop_recording_and_screenshots(update_status)
 )
 stop_button.config(font=("Arial", 24))
 stop_button.grid(row=0, column=1, padx=10)

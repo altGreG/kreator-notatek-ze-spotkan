@@ -1,16 +1,24 @@
 import os
 import time
 from datetime import datetime
-from tkinter import Tk, Canvas
+from tkinter import Tk, Canvas, Button
 from PIL import ImageGrab, ImageChops
 
 def select_area():
-    """Pozwala użytkownikowi zaznaczyć obszar ekranu."""
+    """Pozwala użytkownikowi zaznaczyć obszar ekranu w nakładce."""
     root = Tk()
-    root.attributes('-fullscreen', True)
-    root.attributes('-alpha', 0.3)
-    root.title("Zaznacz obszar")
+    root.attributes("-topmost", True)  # Nakładka nad innymi oknami
+    try:
+        root.attributes("-alpha", 0.3)  # Przezroczystość, jeśli obsługiwana
+    except:
+        root.configure(bg="white")  # Fallback dla starszych wersji Tkinter
 
+    # Dopasowanie nakładki do rozmiaru ekranu
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    root.geometry(f"{screen_width}x{screen_height}")
+
+    # Tworzenie płótna do zaznaczania obszaru
     canvas = Canvas(root, cursor="cross", bg="black")
     canvas.pack(fill="both", expand=True)
 
@@ -31,14 +39,24 @@ def select_area():
         nonlocal start_x, start_y, area
         end_x, end_y = event.x, event.y
         area = [min(start_x, end_x), min(start_y, end_y), abs(end_x - start_x), abs(end_y - start_y)]
-        root.quit()
+        root.destroy()
 
+    def close_overlay():
+        """Funkcja zamykająca nakładkę po kliknięciu X."""
+        root.destroy()
+
+    # Dodaj przycisk zamykający nakładkę
+    close_button = Button(root, text="X", command=close_overlay, bg="red", fg="white", font=("Arial", 14))
+    close_button.place(x=10, y=10, width=30, height=30)  # Pozycjonowanie przycisku "X"
+
+    # Obsługa zdarzeń myszy
     canvas.bind("<ButtonPress-1>", on_mouse_press)
     canvas.bind("<B1-Motion>", on_mouse_drag)
     canvas.bind("<ButtonRelease-1>", on_mouse_release)
 
     root.mainloop()
     return area
+
 
 def create_output_folder():
     """Tworzy folder na zrzuty ekranu."""
@@ -47,42 +65,40 @@ def create_output_folder():
     os.makedirs(folder_name, exist_ok=True)
     return folder_name
 
-def monitor_and_capture(area, folder, threshold=2):
+def monitor_and_capture(area, folder, threshold=2.0):
     """Monitoruje zmiany w wybranym obszarze i zapisuje obraz, jeśli różnice przekraczają próg."""
+    global recording_active
     x, y, width, height = area
     bbox = (x, y, x + width, y + height)
 
     previous_screenshot = None
     count = 0
-    print("Monitoring zmian. Naciśnij Ctrl+C, aby zatrzymać.")
+    recording_active = True  # Flaga kontrolna
 
     try:
-        while True:
+        while recording_active:
             # Zrób aktualny zrzut ekranu
-            current_screenshot = ImageGrab.grab(bbox).convert("RGB")  # Upewnij się, że obraz jest w trybie RGB
+            current_screenshot = ImageGrab.grab(bbox).convert("RGB")
 
             if previous_screenshot is not None:
                 # Oblicz różnicę między poprzednim a bieżącym obrazem
                 diff = ImageChops.difference(previous_screenshot, current_screenshot)
-                diff_bbox = diff.getbbox()  # Sprawdź, czy jest jakakolwiek zmiana
+                diff_bbox = diff.getbbox()
 
                 if diff_bbox:
-                    # Oblicz procent różnicy
                     diff_data = diff.crop(diff_bbox).getdata()
-                    diff_pixels = sum(sum(pixel) for pixel in diff_data)  # Sumujemy wartości R, G, B
-                    total_pixels = width * height * 255 * 3  # 255 * 3 to maksymalna różnica (R+G+B) dla jednego piksela
+                    diff_pixels = sum(sum(pixel) for pixel in diff_data)
+                    total_pixels = width * height * 255 * 3
                     diff_percent = (diff_pixels / total_pixels) * 100
 
                     if diff_percent > threshold:
-                        # Zapisz obraz, jeśli różnica przekracza próg
                         output_file = os.path.join(folder, f"screenshot_{count:03d}.jpg")
                         current_screenshot.save(output_file, "JPEG", quality=85)
                         print(f"Zapisano zrzut ekranu: {output_file}")
                         count += 1
 
-            # Zaktualizuj poprzedni obraz
             previous_screenshot = current_screenshot
-            time.sleep(3)  # Monitoruj co sekundę
+            time.sleep(3)
 
     except KeyboardInterrupt:
         print("Monitoring zakończony.")
