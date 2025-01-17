@@ -34,7 +34,7 @@ import os  # Do obsługi ścieżek plików
 import subprocess
 
 # Ścieżka do pliku czcionki Open Sans
-font_path = r".\OpenSans-ExtraBoldItalic.ttf"
+font_path = r".\styles\OpenSans-ExtraBoldItalic.ttf"
 selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
 if not os.path.exists(font_path):
     raise FileNotFoundError(f"Plik czcionki nie został znaleziony: {font_path}")
