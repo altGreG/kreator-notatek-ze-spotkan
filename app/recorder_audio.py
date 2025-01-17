@@ -55,8 +55,9 @@ def start_recording(update_status: any, selected_audio_device: str) -> None:
             recording_process = subprocess.Popen(
                 ffmpeg_command,
                 stdin=subprocess.PIPE,
-                stdout=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                text=True,
                 shell=True
             )
         log.debug(f"Nagrywanie dźwięku rozpoczęte. Plik zostanie zapisany jako: {output_file}")
@@ -81,18 +82,26 @@ def stop_recording(update_status: any) -> None:
 
     if recording_process:
         try:
-            # Przekazanie polecenia 'q' do procesu, jeśli jest dostępne stdin
-            if recording_process.stdin:
-                recording_process.stdin.write(b"q\n")
-                recording_process.stdin.flush()
+            if system_name == "Linux":
+                # Przekazanie polecenia 'q' do procesu, jeśli jest dostępne stdin
+                if recording_process.stdin:
+                    recording_process.stdin.write(b"q\n")
+                    recording_process.stdin.flush()
 
-            # Oczekiwanie na zakończenie procesu
-            recording_process.wait()
+                # Oczekiwanie na zakończenie procesu
+                recording_process.wait()
 
-            # Przechwycenie i zapisanie wyjścia błędów
-            stderr_output = recording_process.stderr.read().decode()
-            if stderr_output:
-                log.debug(f"Ffmep output message: {stderr_output}")
+                # Przechwycenie i zapisanie wyjścia błędów
+                stderr_output = recording_process.stderr.read().decode()
+                if stderr_output:
+                    log.debug(f"Ffmep output message: {stderr_output}")
+            elif system_name == "Windows":
+                # Przekazanie polecenia 'q' do procesu, jeśli jest dostępne stdin
+                if recording_process.stdin:
+                    stderr_output = recording_process.communicate(input=f"q\n")[1]
+                    log.debug(f"Ffmep output message: {stderr_output}")
+                else:
+                    log.error("There is no stdin in subprocess. Cannot end a process!")
 
             if update_status:
                 log_status("Nagrywanie zakończone. Plik został zapisany.", "info", update_status)
