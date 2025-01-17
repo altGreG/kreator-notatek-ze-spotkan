@@ -27,10 +27,9 @@ source venv/bin/activate
 1. Ze strony https://www.gyan.dev/ffmpeg/builds/ pobierz odpowiednią wersję ffpmpeg. Zip z programem znajdziesz w zakładce 'release builds'.
 2. Rozpakuj program na swoim komputerze w wybranym miejscu, gdzie program zostanie już na stałe.
 3. Nastepnie, aby mieć dostęp do funkcjonalności programu z poziomu terminala, dodaj ścieżkę do folder z plikiem ffmpeg.exe w zmiennych środowiskowych do zmiennej 'PATH'.
-   Robimy to graficznie lub za pomocą komendy:
-```bash
-set PATH=%PATH%;C:\your\path\here;
-```
+   Robimy to graficznie:
+
+![EnvironmentVariables](./assets/EnvironmentVariableConfiguration.gif)
 
 #### Konfiguracja ustawień audio
 Włącz urządzenie audio o nazwie typu 'Mix Stereo', pozwoli ona na nagrywanie dżwięku na twoim komputerze.
@@ -61,6 +60,7 @@ pip install openai
 pip install google-cloud-speech
 pip install protobuf
 pip install loguru
+pip install pillow
 python -m pip install mkdocs
 python -m pip install mkdocs-material
 

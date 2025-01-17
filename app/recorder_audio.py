@@ -81,37 +81,18 @@ def stop_recording(update_status: any) -> None:
 
     if recording_process:
         try:
-            if system_name == "Linux":
-                # Przekazanie polecenia 'q' do procesu, jeśli jest dostępne stdin
-                if recording_process.stdin:
-                    recording_process.stdin.write(b"q\n")
-                    recording_process.stdin.flush()
-            elif system_name == "Windows":
-                # Zakończenie procesu
-                end_command = [
-                    "taskkill",
-                    "/im",
-                    "ffmpeg.exe",
-                    "/t",
-                    "/f"
-                ]
-                subprocess.Popen(
-                    end_command,
-                    stdin=subprocess.PIPE,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    shell=True
-                )
-                # recording_process.kill()
+            # Przekazanie polecenia 'q' do procesu, jeśli jest dostępne stdin
+            if recording_process.stdin:
+                recording_process.stdin.write(b"q\n")
+                recording_process.stdin.flush()
 
             # Oczekiwanie na zakończenie procesu
             recording_process.wait()
 
-            # TODO(altGreG): Sprawdzić czemu zacina program.
             # Przechwycenie i zapisanie wyjścia błędów
-            # stderr_output = recording_process.stderr.read().decode()
-            # if stderr_output:
-            #     log.error(f"Błędy FFmpeg: {stderr_output}")
+            stderr_output = recording_process.stderr.read().decode()
+            if stderr_output:
+                log.debug(f"Ffmep output message: {stderr_output}")
 
             if update_status:
                 log_status("Nagrywanie zakończone. Plik został zapisany.", "info", update_status)

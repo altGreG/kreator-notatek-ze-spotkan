@@ -8,3 +8,4 @@ protobuf
 loguru
 mkdocs
 mkdocs-material
+pillow
