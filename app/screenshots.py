@@ -3,6 +3,9 @@ import time
 from datetime import datetime
 from tkinter import Tk, Canvas, Button
 from PIL import ImageGrab, ImageChops
+from loguru import logger as log
+
+recording_active = False
 
 def select_area():
     """Pozwala użytkownikowi zaznaczyć obszar ekranu w nakładce."""
@@ -65,9 +68,10 @@ def create_output_folder():
     os.makedirs(folder_name, exist_ok=True)
     return folder_name
 
-def monitor_and_capture(area, folder, threshold=2.0):
+def monitor_and_capture(area, folder,threshold=2.0):
     """Monitoruje zmiany w wybranym obszarze i zapisuje obraz, jeśli różnice przekraczają próg."""
     global recording_active
+    recording_active = True
     x, y, width, height = area
     bbox = (x, y, x + width, y + height)
 
@@ -102,6 +106,11 @@ def monitor_and_capture(area, folder, threshold=2.0):
 
     except KeyboardInterrupt:
         print("Monitoring zakończony.")
+
+def stop_monitor_and_capture():
+    global recording_active
+    recording_active = False
+    log.debug(f"Screenshotowanie zakończone. Screenshoty zostały zapisane")
 
 if __name__ == "__main__":
     capture_area = select_area()
