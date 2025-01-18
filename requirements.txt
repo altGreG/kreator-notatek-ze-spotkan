@@ -10,3 +10,5 @@ mkdocs
 mkdocs-material
 pillow
 pydub
+reportlab
+

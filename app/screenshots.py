@@ -1,9 +1,11 @@
 import os
 import time
-from datetime import datetime
 from tkinter import Tk, Canvas, Button
 from PIL import ImageGrab, ImageChops
 from loguru import logger as log
+from datetime import datetime
+
+from app.utilities.recording_utils import create_output_folder
 
 recording_active = False
 
@@ -60,14 +62,6 @@ def select_area():
     root.mainloop()
     return area
 
-
-def create_output_folder():
-    """Tworzy folder na zrzuty ekranu."""
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    folder_name = f"screenshots/spotkanie-{timestamp}"
-    os.makedirs(folder_name, exist_ok=True)
-    return folder_name
-
 def monitor_and_capture(area, folder,threshold=2.0):
     """Monitoruje zmiany w wybranym obszarze i zapisuje obraz, jeśli różnice przekraczają próg."""
     global recording_active
@@ -96,7 +90,7 @@ def monitor_and_capture(area, folder,threshold=2.0):
                     diff_percent = (diff_pixels / total_pixels) * 100
 
                     if diff_percent > threshold:
-                        output_file = os.path.join(folder, f"screenshot_{count:03d}.jpg")
+                        output_file = os.path.join(folder, f"{datetime.now().strftime("%H-%M-%S")}.jpg")
                         current_screenshot.save(output_file, "JPEG", quality=85)
                         print(f"Zapisano zrzut ekranu: {output_file}")
                         count += 1

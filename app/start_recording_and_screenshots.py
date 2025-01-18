@@ -3,6 +3,7 @@ import threading
 
 from recorder_audio import start_recording, stop_recording
 from screenshots import select_area, monitor_and_capture, create_output_folder, stop_monitor_and_capture
+from app.utilities.recording_utils import create_output_folder
 
 # Flaga kontrolująca zrzuty ekranu
 recording_active = False
@@ -20,9 +21,9 @@ def start_recording_and_screenshots(update_status, selected_audio_device, app):
     global recording_active, screenshot_thread
     capture_area=None
 
-
     # Tworzenie folderu na zrzuty ekranu
-    output_folder = create_output_folder()
+    output_folders = create_output_folder()
+    print(output_folders)
 
     # Flaga aktywności
     recording_active = True
@@ -35,10 +36,10 @@ def start_recording_and_screenshots(update_status, selected_audio_device, app):
         if not capture_area:
             app.after(0, lambda: update_status("Nie wybrano obszaru do zrzutów ekranu."))
             return
-        monitor_and_capture(capture_area, output_folder)
+        monitor_and_capture(capture_area, output_folders[2])
 
     # Uruchomienie nagrywania dźwięku w osobnym wątku
-    audio_thread = threading.Thread(target=start_recording, args=(update_status, selected_audio_device))
+    audio_thread = threading.Thread(target=start_recording, args=(update_status, selected_audio_device, output_folders[1]))
     screenshot_thread = threading.Thread(target=run_screenshots)
 
     audio_thread.start()
