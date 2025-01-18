@@ -33,6 +33,7 @@ from recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
 import os  # Do obsługi ścieżek plików
+import webbrowser
 import subprocess
 
 
@@ -49,7 +50,7 @@ def update_status(new_status):
     Aktualizuje tekst widżetu statusu i wyśrodkowuje go.
     """
     def update_label():
-        font_size = 24
+        font_size = 20
         font = ImageFont.truetype(font_path, font_size)
         text = f"Status: {new_status}"
 
@@ -105,7 +106,8 @@ def show_settings():
     # Tworzenie okna ustawień
     settings_window = tk.Toplevel(app)
     settings_window.title("Ustawienia")
-    settings_window.geometry("400x300")
+    settings_window.geometry("300x300")  # Ustawienie rozmiaru okna
+    settings_window.resizable(False, False)  # Zablokowanie możliwości zmiany rozmiaru
     settings_window.configure(bg="#ebe4d6")
 
     tk.Label(settings_window, text="Wybierz urządzenie audio:", bg="#ebe4d6", font=("Arial", 12)).pack(pady=10)
@@ -116,9 +118,10 @@ def show_settings():
         tk.Label(settings_window, text="Brak dostępnych urządzeń audio.", bg="#ebe4d6", fg="red").pack()
         return
 
-    # Pole wyboru urządzenia audio
-    device_var = tk.StringVar(value=selected_audio_device)
+    # Pole wyboru urządzenia audio - brak domyślnego zaznaczenia
+    device_var = tk.StringVar(value="UNSELECTED")  # Ustaw wartość początkową na niestandardową
 
+    # Tworzenie przycisków radiowych
     for device in devices:
         tk.Radiobutton(
             settings_window,
@@ -132,32 +135,99 @@ def show_settings():
     def save_settings():
         nonlocal device_var
         global selected_audio_device
+        if device_var.get() == "UNSELECTED":
+            messagebox.showwarning("Brak wyboru", "Proszę wybrać urządzenie audio przed zapisaniem ustawień.")
+            return
         selected_audio_device = device_var.get()
         log.debug(f"Wybrane urządzenie audio: {selected_audio_device}")
         settings_window.destroy()
 
-    # Przycisk zapisu ustawień
-    tk.Button(settings_window, text="Zapisz", command=save_settings, bg="#ad9d99", fg="white", font=("Arial", 12)).pack(pady=20)
+    # Tworzenie okrągłego przycisku zapisu
+    save_button = create_circle_button(
+        settings_window,
+        x=125,  # Pozycja przycisku w oknie
+        y=200,
+        size=50,  # Rozmiar przycisku
+        text="✔️",  # Tekst na przycisku
+        fill_color="#ad9d99",  # Kolor wypełnienia przycisku
+        outline_color="black",  # Kolor obramowania
+        command=save_settings  # Funkcja wywoływana po kliknięciu
+    )
+
 
 def show_help() -> None:
     """
-    Włącza widoczność okna z informacjami jak korzystać z programu.
+    Przekierowuje do dokumentacji pomocy online.
     """
-    # Placeholder okno pomocy
-    messagebox.showinfo("Pomoc", "Pomoc aplikacji.")
+    url = "https://github.com/altGreG/kreator-notatek-ze-spotkan/blob/main/docs/configuration.md"
+    webbrowser.open_new_tab(url)
 
-def toggle_transcription():
-    if transcription_frame.winfo_ismapped():
-        transcription_frame.pack_forget()
-    else:
-        transcription_frame.pack(fill="both", expand=True, padx=20, pady=10)
+def show_transcription_window():
+    """
+    Otwiera nowe okno do wyświetlania transkrypcji z paskiem przewijania, z możliwością zmiany rozmiaru.
+    """
+    # Sprawdź, czy okno transkrypcji już istnieje
+    if hasattr(show_transcription_window, "transcription_window") and show_transcription_window.transcription_window.winfo_exists():
+        show_transcription_window.transcription_window.deiconify()  # Przywróć okno, jeśli zostało zminimalizowane
+        return
+
+    # Tworzenie nowego okna
+    transcription_window = tk.Toplevel(app)
+    transcription_window.title("Transkrypcja")
+    transcription_window.geometry("400x400")  # Początkowy rozmiar okna
+    transcription_window.configure(bg="#ebe4d6")
+
+    # Tworzenie ramki dla paska przewijania i pola tekstowego
+    frame = tk.Frame(transcription_window, bg="#ebe4d6")
+    frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    # Tworzenie paska przewijania
+    scrollbar = tk.Scrollbar(frame)
+    scrollbar.pack(side="right", fill="y")
+
+    # Tworzenie pola tekstowego
+    transcription_text = tk.Text(
+        frame,
+        bg="white",
+        fg="black",
+        font=("Arial", 12),  # Czcionka dla tekstu w transkrypcji
+        relief=tk.FLAT,  # Brak obramowania tekstowego
+        state="disabled",  # Ustawienie pola jako tylko do odczytu
+        wrap="word",  # Zawijanie tekstu w oknie
+        yscrollcommand=scrollbar.set  # Powiązanie paska przewijania z polem tekstowym
+    )
+    transcription_text.pack(side="left", fill="both", expand=True)
+
+    # Powiązanie paska przewijania z polem tekstowym
+    scrollbar.config(command=transcription_text.yview)
+
+    # Przechowywanie odniesienia do pola tekstowego
+    show_transcription_window.transcription_text = transcription_text
+    show_transcription_window.transcription_window = transcription_window
 
 # Tworzenie głównego okna aplikacji
 app = tk.Tk()
 app.title("Aplikacja do Nagrywania Spotkań")
 app.resizable(False, False)
-app.geometry("600x400")
 app.configure(bg="#ebe4d6")
+app.attributes("-topmost", True)  # Always on top
+
+# Obliczanie pozycji dla prawego dolnego rogu
+screen_width = app.winfo_screenwidth()  # Szerokość ekranu
+screen_height = app.winfo_screenheight()  # Wysokość ekranu
+
+# Rozmiar okna aplikacji
+window_width = 550
+window_height = 225
+
+# Pozycja w prawym dolnym rogu
+x_position = screen_width - window_width - 10  # 10px od prawej krawędzi
+y_position = screen_height - window_height - 20  # 50px od dolnej krawędzi (dla taskbara)
+
+# Ustawienie pozycji okna
+app.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+
+
 
 # Funkcja do animowanego rozwijania i zwijania przycisków
 def animate_buttons(buttons, target_positions, duration=200, step=10):
@@ -189,7 +259,11 @@ def animate_buttons(buttons, target_positions, duration=200, step=10):
 
 # Funkcja do rozwijania i zwijania przycisków z animacją
 def toggle_menu_buttons(canvas, main_button, buttons):
-    if all(button.winfo_ismapped() for button in buttons):  # Jeśli wszystkie przyciski są widoczne
+    # Sprawdź, czy menu jest rozwinięte
+    if not hasattr(toggle_menu_buttons, "menu_visible"):
+        toggle_menu_buttons.menu_visible = False
+
+    if toggle_menu_buttons.menu_visible:  # Jeśli menu jest rozwinięte
         # Ukryj przyciski przez animację w kierunku głównego przycisku
         target_positions = [(10, 10) for _ in buttons]
         animate_buttons(buttons, target_positions, duration=200, step=10)
@@ -198,8 +272,12 @@ def toggle_menu_buttons(canvas, main_button, buttons):
         # Wyświetl przyciski w odpowiednich pozycjach z animacją
         for button in buttons:
             button.place(x=10, y=10)  # Ustaw startową pozycję przycisków
-        target_positions = [(60, 10), (110, 10), (160, 10), (210, 10)]
+        target_positions = [(60, 10), (110, 10), (160, 10)]
         animate_buttons(buttons, target_positions, duration=200, step=10)
+
+    # Zmień stan menu
+    toggle_menu_buttons.menu_visible = not toggle_menu_buttons.menu_visible
+
 
 # Funkcja do stworzenia przycisku okrągłego (z obrazem lub tekstem)
 def create_circle_button(parent, x, y, size, text, fill_color, outline_color, command):
@@ -238,11 +316,6 @@ def create_main_menu(canvas, app):
     # Przyciski dodatkowe
     buttons = []
 
-    # Dodanie przycisku "Plik"
-    file_button = create_circle_button(app, x=0, y=0, size=40, text="📂", fill_color="#ad9d99",
-                                       outline_color="black", command=lambda:open_file_menu(file_button))
-    buttons.append(file_button)
-
     # Dodanie przycisku "Ustawienia"
     settings_button = create_circle_button(app, x=0, y=0, size=40, text="⚙", fill_color="#ad9d99",
                                            outline_color="black", command=show_settings)
@@ -271,20 +344,6 @@ def create_main_menu(canvas, app):
 # Tworzenie głównego przycisku menu i dodatkowych przycisków
 main_menu_button, buttons = create_main_menu(None, app)
 
-# Tworzenie menu Plik (z rozwijaną listą opcji)
-def open_file_menu(file_button):
-    file_menu = tk.Menu(app, tearoff=0)
-    file_menu.add_command(label="Nowe nagranie", command=lambda: start_recording(update_status, selected_audio_device))
-    file_menu.add_command(label="Otwórz...", command=open_file)
-
-    # Pobranie współrzędnych przycisku "Plik"
-    x = file_button.winfo_rootx()
-    y = file_button.winfo_rooty() + file_button.winfo_height()
-
-    # Wyświetlanie menu w obliczonej pozycji
-    file_menu.post(x, y)
-
-
 # Tworzenie płótna dla przycisku menu (niepotrzebne w tej wersji, ale zostaje)
 canvas = tk.Canvas(app, width=50, height=50, bg="#ebe4d6", highlightthickness=0)
 canvas.place(x=1, y=1)
@@ -293,7 +352,7 @@ canvas.place(x=1, y=1)
 create_main_menu(canvas, app)
 
 # Ładowanie czcionki Open Sans
-open_sans_font = (font_path, 24)
+open_sans_font = (font_path, 20)
 
 # Tworzenie widżetu status_label
 status_label = tk.Label(app, bg="#ebe4d6")
@@ -343,7 +402,7 @@ show_transcription_button = create_circle_button(
     text="📄",
     fill_color="#ad9d99",
     outline_color="black",
-    command=toggle_transcription
+    command=show_transcription_window
 )
 show_transcription_button.config(font=("Arial", 22))
 show_transcription_button.grid(row=0, column=2, padx=10)
@@ -361,36 +420,6 @@ notes_button = create_circle_button(
 )
 notes_button.config(font=("Arial", 24))
 notes_button.grid(row=0, column=3, padx=10)
-# Tworzenie ramki dla transkrypcji
-transcription_frame = tk.Frame(app, bg="#ad9d99", highlightbackground="black", highlightthickness=2)
-
-transcription_text = tk.Text(
-    transcription_frame,
-    bg="white",
-    fg="black",
-    font=("Arial", 12),  # Czcionka dla tekstu w transkrypcji
-    relief=tk.FLAT,  # Brak obramowania tekstowego
-    state="disabled"  # Ustawienie pola jako tylko do odczytu
-)
-transcription_text.place(relx=0, rely=0, relwidth=1, relheight=1)
-
-# Funkcja do pokazywania/ukrywania transkrypcji
-def toggle_transcription():
-    if transcription_frame.winfo_ismapped():
-        transcription_frame.place_forget()
-    else:
-        transcription_frame.place(x=50, y=220, width=500, height=150)
-
-# Powiązanie przycisku z funkcją
-show_transcription_button.config(command=toggle_transcription)
-
-# Ukrycie ramki transkrypcji na starcie
-transcription_frame.place_forget()
-
-def update_transcription(text):
-    transcription_text.config(state="normal")  # Odblokuj pole
-    transcription_text.insert("end", text + "\n")  # Dodaj tekst
-    transcription_text.config(state="disabled")  # Zablokuj pole
 
 def get_audio_devices():
     """
