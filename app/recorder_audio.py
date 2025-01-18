@@ -15,7 +15,7 @@ recording_active = True
 recording_directory = None
 
 
-def start_recording(update_status: any, selected_audio_device: str) -> None:
+def start_recording(update_status: any, selected_audio_device: str, recording_folder: str) -> None:
     """
     Funkcja rozpoczynająca nagrywanie dźwięku z wybranego urządzenia.
 
@@ -25,6 +25,8 @@ def start_recording(update_status: any, selected_audio_device: str) -> None:
     """
     global recording_process, recording_active, recording_directory
 
+    recording_directory = recording_folder
+
     if not selected_audio_device:
         messagebox.showerror("Błąd", "Nie wybrano urządzenia audio. Skonfiguruj ustawienia.")
         log.warning("Nie wybrano urządzenia audio. Skonfiguruj ustawienia.")
@@ -33,9 +35,6 @@ def start_recording(update_status: any, selected_audio_device: str) -> None:
     if update_status:
         log_status("Nagrywanie dźwięku w toku...", "info", update_status)
 
-    # Tworzenie folderu dla bieżącego nagrania
-    recording_directory = os.path.join(os.getcwd(), "nagrania_audio", datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
-    os.makedirs(recording_directory, exist_ok=True)
 
     # Konfiguracja polecenia FFmpeg
     ffmpeg_command = [

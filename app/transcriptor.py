@@ -131,9 +131,9 @@ def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) ->
     try:
         if device == "cuda":
             with torch.cuda.device(device):
-                result = model.transcribe(audio=audio, language="pl", word_timestamps=True)
+                result = model.transcribe(audio=audio, language="pl")
         else:
-            result = model.transcribe(audio=audio, language="pl", word_timestamps=True)
+            result = model.transcribe(audio=audio, language="pl")
 
         # Proste formatowanie tekstu
         transcribed_text = text_formatting(result["text"])
@@ -263,8 +263,9 @@ def transcribe_audio_from_folder(folder_path: str, update_status: any) -> str:
     folder_path_pattern = f"{folder_path}/*.mp3"
     end_path = f"{folder_path}/koniec.txt"
 
-    folder_name = ((folder_path.replace("\\", "/")).split("/")[-1])
-    log.debug(f"Folder name: {folder_name}")
+    base_path, timestamp = (folder_path.replace("\\", "/")).rsplit("/audio-", 1)
+    transcription_folder = base_path + "/" + f"txt-{timestamp}"
+    log.debug(f"Txt folder path: {transcription_folder}")
 
     log.debug("Rozpoczęto transkrypcję plików audio z folderu")
 
@@ -287,7 +288,10 @@ def transcribe_audio_from_folder(folder_path: str, update_status: any) -> str:
                 transcribed_files.append(filepath)
                 count_of_transcribed += 1
 
-                save_text_to_txt(folder_name, transcribed_text,update_status)
+                filename_and_path, ext = os.path.splitext(filepath)
+                filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
+
+                save_text_to_txt(filename, transcribed_text,update_status,transcription_folder)
                 log.debug(f"Liczba przetranskrybowanych plików: {count_of_transcribed}")
 
             else:
