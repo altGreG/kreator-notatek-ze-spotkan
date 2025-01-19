@@ -37,7 +37,7 @@ import webbrowser
 import subprocess
 
 
-
+recording_active = False  # Globalna zmienna śledząca stan nagrywania
 
 # Ścieżka do pliku czcionki Open Sans
 font_path = r".\styles\OpenSans-ExtraBoldItalic.ttf"
@@ -374,10 +374,44 @@ start_button = create_circle_button(
     text="▶",
     fill_color="#ad9d99",
     outline_color="black",
-    command=lambda: start_recording_and_screenshots(update_status, selected_audio_device, app)
+    command=lambda: start_recording_and_screenshots_with_disable(
+        update_status, selected_audio_device, app, start_button
+    )
 )
 start_button.config(font=("Arial", 24))
 start_button.grid(row=0, column=0, padx=10)
+
+# Funkcja obsługująca rozpoczęcie nagrywania z blokadą przycisku
+def start_recording_and_screenshots_with_disable(update_status, selected_audio_device, app, start_button):
+    """
+    Rozpoczyna nagrywanie i przechwytywanie zrzutów ekranu z blokadą przycisku Play.
+    """
+    global recording_active
+
+    if recording_active:
+        return  # Jeśli już nagrywa, nic nie rób
+
+    # Wyłącz przycisk "Play"
+    start_button.config(state="disabled")
+
+    # Uruchom oryginalną funkcję startującą nagrywanie i screeny
+    start_recording_and_screenshots(update_status, selected_audio_device, app)
+
+    # Ustawienie flagi, że nagrywanie jest aktywne
+    recording_active = True
+def stop_recording_and_screenshots(update_status):
+    """
+    Zatrzymuje nagrywanie i proces przechwytywania zrzutów ekranu.
+    """
+    global recording_active
+
+    # Twoja logika zatrzymania nagrywania
+    stop_recording(update_status)
+    recording_active = False
+
+    # Włącz ponownie przycisk "Play"
+    start_button.config(state="normal")
+    update_status("Nagrywanie i zrzuty ekranu zakończone.")
 
 # Zatrzymaj nagrywanie
 stop_button = create_circle_button(
