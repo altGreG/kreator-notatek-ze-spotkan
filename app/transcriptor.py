@@ -25,7 +25,6 @@ Ten plik może zostać zaimportowany również jako moduł i zawiera następują
     * extract_audio_from_video - ekstrakcja audio z video
     * transcribe_with_whisper_offline - transkrypcja audio z modelem Whisper na maszynie użytkownika
     * transcribe_with_gcloud - transkrypcja audio w chmurze Google Cloud i usługu Speech To Text
-    * text_formatting - formatowanie tekstu, by linijka zawierała maksymalnie 30 słów
 """
 
 
@@ -41,7 +40,7 @@ import warnings
 from google.oauth2 import service_account
 from google.cloud import speech
 from loguru import logger as log
-from app.logger import log_status
+from app.utilities.logger import log_status
 from app.saving import save_text_to_txt
 
 extracting_process = -1
@@ -136,7 +135,7 @@ def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) ->
             result = model.transcribe(audio=audio, language="pl")
 
         # Proste formatowanie tekstu
-        transcribed_text = text_formatting(result["text"])
+        transcribed_text = result["text"]
 
         log_status("Skutecznie dokonano transkrypcji audio.", "success", update_status)
         # print("Przetranskrybowany tekst:\n", transcribed_text)
@@ -208,7 +207,7 @@ def transcribe_with_gcloud(audio_file_path: str, update_status: any) -> tuple[st
             transcribed_text_before_formatting = result.alternatives[0].transcript
 
         # Proste formatowanie tekstu
-        transcribed_text = text_formatting(transcribed_text_before_formatting)
+        transcribed_text = transcribed_text_before_formatting
 
         log_status("Sukces. Dokonano transkrypcji audio.", "success", update_status)
         print("Przetranskrybowany tekst:\n", transcribed_text)
@@ -217,28 +216,6 @@ def transcribe_with_gcloud(audio_file_path: str, update_status: any) -> tuple[st
         return filename, None
 
     return filename, transcribed_text
-
-def text_formatting(text: str) -> str:
-    """
-    Formatowanie tekstu
-
-    Transformacja tekstu w taki sposób, by każda linijka tekstu zajmowała maksymalnie 30 słów.
-
-    Args:
-        text: tekst do sformatowania
-
-    Returns:
-        sformatowany tekst
-    """
-    i = 1
-    result = ""
-    for word in text.split(" "):
-        i += 1
-        if i % 20 == 0:
-            result += f"{word}\n"
-        else:
-            result += f"{word} "
-    return result
 
 def transcribe_audio_from_folder(folder_path: str, update_status: any) -> str:
     """

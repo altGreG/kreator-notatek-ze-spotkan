@@ -29,7 +29,7 @@ import os
 import signal
 from datetime import datetime
 from loguru import logger as log
-from logger import log_status
+from app.utilities.logger import log_status
 
 recording_process = None  # Zmienna globalna do przechowywania procesu nagrywania
 

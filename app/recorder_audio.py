@@ -4,11 +4,10 @@ import os
 import threading
 from datetime import datetime
 from pydub import AudioSegment
-from pydub.playback import play
 from io import BytesIO
 from tkinter import messagebox
 from loguru import logger as log
-from logger import log_status
+from app.utilities.logger import log_status
 
 recording_process = None
 recording_active = True
