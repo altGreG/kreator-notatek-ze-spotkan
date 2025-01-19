@@ -16,6 +16,13 @@ python3 -m venv venv
 # wejdź do stworzonego środowiska
 source venv/bin/activate
 ```
+
+#### Dodanie klucza API do OPENAI
+Aby dodać klucz api wykonaj komendę:
+```bash
+export OPENAI_API_KEY="twój_klucz_api"
+```
+
 ---
 # Windows
 #### Instalacja Pythona
@@ -42,6 +49,12 @@ pip install virtualenv
 python -m venv env
 # wejdź do stworzonego środowiska
 env\Scripts\activate
+```
+
+#### Dodanie klucza API do OPENAI
+Aby dodać klucz api wykonaj komendę:
+```bash
+setx OPENAI_API_KEY "twój_klucz_api"
 ```
 ---
 

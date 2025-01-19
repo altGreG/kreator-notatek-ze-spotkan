@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import glob
 from typing import List, Any
 
 
@@ -37,3 +38,57 @@ def create_output_folder() -> list[str]:
     output_list = [meeting_directory.replace("\\", "/"), recording_directory.replace("\\", "/"), screenshots_directory.replace("\\", "/")]
 
     return output_list
+
+def txt_files_aggregation(meeting_folder: str) -> None:
+    """
+    Funkcja łączy poszczególne fragmenty transkrypcji między screenami ekranu w większą całość.
+
+    Funkcja buduje listę ścieżek do txt i jpg. Sortuje ją po timestampie. Następnie łączy pliki transkrypcji,
+    która była między poszczególnymi momentami wykonania zrzutaów ekranu w jeden plik txt, który nosi nazwę
+    najwcześniejszego timestampu audio z grupy.
+
+    Stare pliki funkcja przenosi do folderu archiwum w folderze z transkrypcjami (timestamp/txt-timestamp/archiwum).
+
+    Arguments:
+        meeting_folder: ścieżka do folderu z danymi danego spotkania
+    """
+
+    timestamp = (meeting_folder.replace("\\", "/")).rsplit("/", 1)[1]
+    txt_pattern = meeting_folder + f"/txt-{timestamp}/*.txt"
+    screenshots_pattern = meeting_folder + f"/screenshots-{timestamp}/*.jpg"
+
+    archiwum_path = meeting_folder + f"/txt-{timestamp}/archiwum"
+    os.makedirs(archiwum_path, exist_ok=True)
+
+    txt_files = glob.glob(txt_pattern)
+    jpg_files = glob.glob(screenshots_pattern)
+
+    files = txt_files + jpg_files
+
+    print("Posortowane pliki, patrz na timestamp(nazwe pliku jpg lub txt)")
+    files.sort(key= lambda f: ((f.replace("\\", "/")).rsplit("/", 1)[1]).rsplit(".", 1)[0])
+    for file in files:
+        print(file)
+
+
+
+    done_files = []
+    temp_done_list = []
+    for file in files:
+        if file not in done_files:
+            ext = file.rsplit(".",1)[1]
+            filename = ((file.rsplit(".",1)[0]).replace("\\", "/")).rsplit("/", 1)[1]
+
+            if ext == "txt":
+                if temp_done_list == []:
+                    temp_done_list.append(file)
+                else:
+                    with open(file, 'r', encoding='utf-8') as f:
+                        text = f.read()
+                    with open(temp_done_list[0], 'a', encoding='utf-8') as f:
+                        f.write(text, )
+                    done_files.append(file)
+
+                    os.rename(file, f"{file.replace('\\', '/').rsplit('/', 1)[0]}/archiwum/{filename}.{ext}")
+            elif ext == "jpg":
+                temp_done_list = []
