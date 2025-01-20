@@ -11,4 +11,4 @@ mkdocs-material
 pillow
 pydub
 reportlab
-
+python-dotenv
