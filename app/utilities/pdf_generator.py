@@ -1,7 +1,11 @@
 import os
+from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+
 
 def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
     """
@@ -13,6 +17,14 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
         screenshots_folder (str): Ścieżka do folderu zawierającego pliki zrzutów ekranu.
         transcripts_folder (str): Ścieżka do folderu zawierającego pliki transkrypcji.
     """
+    # Rejestracja czcionki obsługującej polskie znaki
+    styles_path = (os.getcwd().replace("\\", "/")).rsplit(r"/kreator-notatek-ze-spotkan")[0] + "/kreator-notatek-ze-spotkan/app/styles"
+    font_path = f"{styles_path}/DejaVuSans.ttf"  # Ścieżka do pliku czcionki
+    if not os.path.exists(font_path):
+        raise FileNotFoundError(f"Nie znaleziono pliku czcionki: {font_path}")
+
+    pdfmetrics.registerFont(TTFont("DejaVuSans", font_path))
+
     # Pobierz listę plików w folderach
     screenshots = [f for f in os.listdir(screenshots_folder) if f.endswith('.jpg')]
     transcripts = [f for f in os.listdir(transcripts_folder) if f.endswith('.txt')]
@@ -52,7 +64,8 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
                     c.showPage()
                     y_position = height - margin
 
-                c.drawImage(img, margin, y_position - display_height, display_width, display_height, preserveAspectRatio=True)
+                c.drawImage(img, margin, y_position - display_height, display_width, display_height,
+                            preserveAspectRatio=True)
                 y_position -= (display_height + 20)  # Przestrzeń po obrazie
                 print(f"Dodano obraz: {filename}")
             except Exception as e:
@@ -65,7 +78,7 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     text = f.read()
 
-                c.setFont("Helvetica", 10)
+                c.setFont("DejaVuSans", 10)  # Ustaw czcionkę obsługującą polskie znaki
                 lines = text.splitlines()
 
                 for line in lines:
@@ -73,7 +86,7 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
                     line_buffer = ""
 
                     for word in words:
-                        if c.stringWidth(line_buffer + word + " ", "Helvetica", 10) < (width - 2 * margin):
+                        if c.stringWidth(line_buffer + word + " ", "DejaVuSans", 10) < (width - 2 * margin):
                             line_buffer += word + " "
                         else:
                             c.drawString(margin, y_position, line_buffer.strip())
@@ -81,6 +94,7 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
 
                             if y_position < margin:
                                 c.showPage()
+                                c.setFont("DejaVuSans", 10)  # Ustaw czcionkę na nowej stronie
                                 y_position = height - margin
 
                             line_buffer = word + " "
@@ -91,6 +105,7 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
 
                         if y_position < margin:
                             c.showPage()
+                            c.setFont("DejaVuSans", 10)
                             y_position = height - margin
 
                 print(f"Dodano transkrypcję: {filename}")
@@ -106,16 +121,3 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
     # Zakończ dokument PDF
     c.save()
     print(f"Raport PDF został wygenerowany: {output_pdf}")
-
-# Przykład użycia
-if __name__ == "__main__":
-    screenshots_folder = "screenshots"  # Ścieżka do folderu z plikami zrzutów ekranu
-    transcripts_folder = "transcripts"  # Ścieżka do folderu z plikami transkrypcji
-    output_path = "raport_spotkania.pdf"  # Ścieżka do pliku PDF
-
-    if not os.path.exists(screenshots_folder):
-        print(f"Folder {screenshots_folder} nie istnieje.")
-    elif not os.path.exists(transcripts_folder):
-        print(f"Folder {transcripts_folder} nie istnieje.")
-    else:
-        generate_pdf_from_files(output_path, screenshots_folder, transcripts_folder)
