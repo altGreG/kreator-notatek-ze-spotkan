@@ -480,5 +480,27 @@ def get_audio_devices():
         return []
 
 
+def find_all_pdfs():
+    """
+    Przeszukuje wszystkie podfoldery w katalogu spotkania w poszukiwaniu plików PDF.
+
+    Args:
+        meetings_folder (str): Ścieżka do folderu, w którym znajdują się podfoldery ze spotkaniami.
+
+    Returns:
+        list: Posortowana lista pełnych ścieżek do znalezionych plików PDF.
+    """
+    pdf_files = []  # Lista przechowująca znalezione pliki PDF
+    meetings_folder =".\spotkania"
+    # Przeszukaj katalog spotkania rekurencyjnie
+    for root, _, files in os.walk(meetings_folder):
+        for file in files:
+            if file.endswith(".pdf"):  # Szukamy tylko plików PDF
+                pdf_files.append(os.path.join(root, file))  # Dodaj pełną ścieżkę do listy
+
+    # Posortuj listę plików PDF według nazw plików
+    pdf_files.sort()
+    return pdf_files
+
 # Uruchomienie aplikacji
 app.mainloop()
