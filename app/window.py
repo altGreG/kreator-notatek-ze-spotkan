@@ -29,6 +29,7 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 
 from app.start_recording_and_screenshots import start_recording_and_screenshots, stop_recording_and_screenshots
+from app.utilities.logger import log_status
 from recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
@@ -391,6 +392,10 @@ def start_recording_and_screenshots_with_disable(update_status, selected_audio_d
     if recording_active:
         return  # Jeśli już nagrywa, nic nie rób
 
+    if selected_audio_device is None:
+        log_status("Nie wybrano urządzenia audio. Skonfiguruj ustawienia.", "warning", update_status)
+        return
+
     # Wyłącz przycisk "Play"
     start_button.config(state="disabled")
 
@@ -404,6 +409,10 @@ def stop_recording_all(update_status):
     Zatrzymuje nagrywanie i proces przechwytywania zrzutów ekranu.
     """
     global recording_active
+
+    if recording_active == False:
+        log_status("Nie rozpoczęto jeszcze nagrywania!", "warning", update_status)
+        return
 
     # Twoja logika zatrzymania nagrywania
     stop_recording(update_status)
@@ -491,7 +500,7 @@ def find_all_pdfs():
         list: Posortowana lista pełnych ścieżek do znalezionych plików PDF.
     """
     pdf_files = []  # Lista przechowująca znalezione pliki PDF
-    meetings_folder =".\spotkania"
+    meetings_folder =".\\spotkania"
     # Przeszukaj katalog spotkania rekurencyjnie
     for root, _, files in os.walk(meetings_folder):
         for file in files:
