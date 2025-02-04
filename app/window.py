@@ -399,7 +399,7 @@ def start_recording_and_screenshots_with_disable(update_status, selected_audio_d
 
     # Ustawienie flagi, że nagrywanie jest aktywne
     recording_active = True
-def stop_recording_and_screenshots(update_status):
+def stop_recording_all(update_status):
     """
     Zatrzymuje nagrywanie i proces przechwytywania zrzutów ekranu.
     """
@@ -408,6 +408,8 @@ def stop_recording_and_screenshots(update_status):
     # Twoja logika zatrzymania nagrywania
     stop_recording(update_status)
     recording_active = False
+
+    stop_recording_and_screenshots(update_status)
 
     # Włącz ponownie przycisk "Play"
     start_button.config(state="normal")
@@ -422,7 +424,7 @@ stop_button = create_circle_button(
     text="◼",
     fill_color="#ad9d99",
     outline_color="black",
-    command=lambda: stop_recording_and_screenshots(update_status)
+    command=lambda: stop_recording_all(update_status)
 )
 stop_button.config(font=("Arial", 24))
 stop_button.grid(row=0, column=1, padx=10)
