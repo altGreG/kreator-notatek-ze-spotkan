@@ -92,7 +92,7 @@ def monitor_and_capture(area, folder,threshold=2.0):
                     if diff_percent > threshold:
                         output_file = os.path.join(folder, f"{datetime.now().strftime("%H-%M-%S")}.jpg")
                         current_screenshot.save(output_file, "JPEG", quality=85)
-                        print(f"Zapisano zrzut ekranu: {output_file}")
+                        log.success(f"Zapisano zrzut ekranu: {output_file.replace("\\", "/").rsplit("/", 1)[1]}")
                         count += 1
 
             previous_screenshot = current_screenshot
@@ -109,8 +109,8 @@ def stop_monitor_and_capture():
 if __name__ == "__main__":
     capture_area = select_area()
     if capture_area:
-        print(f"Wybrano obszar: {capture_area}")
+        log.info(f"Wybrano obszar: {capture_area}")
         output_folder = create_output_folder()
         monitor_and_capture(capture_area, output_folder)
     else:
-        print("Nie wybrano obszaru. Zamykanie aplikacji.")
+        log.warning("Nie wybrano obszaru. Zamykanie aplikacji.")

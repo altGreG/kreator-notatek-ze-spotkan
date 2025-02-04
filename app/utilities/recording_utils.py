@@ -35,7 +35,7 @@ def create_output_folder() -> list[str]:
     screenshots_directory = os.path.join(meeting_directory, f"screenshots-{timestamp}")
     os.makedirs(screenshots_directory, exist_ok=True)
 
-    output_list = [meeting_directory.replace("\\", "/"), recording_directory.replace("\\", "/"), screenshots_directory.replace("\\", "/")]
+    output_list = [meeting_directory.replace("\\", "/"), recording_directory.replace("\\", "/"), screenshots_directory.replace("\\", "/"), transcription_directory.replace("\\", "/")]
 
     return output_list
 

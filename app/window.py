@@ -41,12 +41,21 @@ import subprocess
 
 
 recording_active = False  # Globalna zmienna śledząca stan nagrywania
+transcription_active = False  # Globalna zmienna śledząca stan transkrypcji nagrania
 
 # Ścieżka do pliku czcionki Open Sans
 font_path = r".\styles\OpenSans-ExtraBoldItalic.ttf"
 selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
 if not os.path.exists(font_path):
     raise FileNotFoundError(f"Plik czcionki nie został znaleziony: {font_path}")
+
+def transription_false_update():
+    global transcription_active
+    transcription_active = False
+
+    # Włącz ponownie przycisk "Play"
+    start_button.config(state="normal")
+    update_status("Transkrypcja audio zakończona.")
 
 def update_status(new_status):
     """
@@ -378,18 +387,18 @@ start_button = create_circle_button(
     fill_color="#ad9d99",
     outline_color="black",
     command=lambda: start_recording_and_screenshots_with_disable(
-        update_status, selected_audio_device, app, start_button
+        update_status, selected_audio_device, app, start_button, transription_false_update
     )
 )
 start_button.config(font=("Arial", 24))
 start_button.grid(row=0, column=0, padx=10)
 
 # Funkcja obsługująca rozpoczęcie nagrywania z blokadą przycisku
-def start_recording_and_screenshots_with_disable(update_status, selected_audio_device, app, start_button):
+def start_recording_and_screenshots_with_disable(update_status, selected_audio_device, app, start_button, transription_false_update):
     """
     Rozpoczyna nagrywanie i przechwytywanie zrzutów ekranu z blokadą przycisku Play.
     """
-    global recording_active
+    global recording_active, transcription_active
 
     if recording_active:
         return  # Jeśli już nagrywa, nic nie rób
@@ -402,10 +411,12 @@ def start_recording_and_screenshots_with_disable(update_status, selected_audio_d
     start_button.config(state="disabled")
 
     # Uruchom oryginalną funkcję startującą nagrywanie i screeny
-    start_recording_and_screenshots(update_status, selected_audio_device, app)
+    transcription_active = start_recording_and_screenshots(update_status, selected_audio_device, app, transription_false_update)
 
     # Ustawienie flagi, że nagrywanie jest aktywne
     recording_active = True
+    transcription_active = True
+
 def stop_recording_all(update_status):
     """
     Zatrzymuje nagrywanie i proces przechwytywania zrzutów ekranu.
@@ -413,17 +424,18 @@ def stop_recording_all(update_status):
     global recording_active
 
     if recording_active == False:
-        log_status("Nie rozpoczęto jeszcze nagrywania!", "warning", update_status)
+        log_status("Brak aktywnego nagrywania!", "warning", update_status)
         return
+
+    recording_active = False
 
     # Twoja logika zatrzymania nagrywania
     stop_recording(update_status)
-    recording_active = False
 
     stop_recording_and_screenshots(update_status)
 
     # Włącz ponownie przycisk "Play"
-    start_button.config(state="normal")
+    # start_button.config(state="normal")
     update_status("Nagrywanie i zrzuty ekranu zakończone.")
 
 # Zatrzymaj nagrywanie

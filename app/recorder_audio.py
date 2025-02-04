@@ -96,7 +96,7 @@ def _save_audio_fragments():
 
                 # Zapisz fragment
                 audio_segment[:fragment_duration].export(output_file, format="mp3", bitrate="192k")
-                log.debug(f"Zapisano fragment: {output_file}")
+                log.debug(f"Zapisano fragment audio: {output_file.replace("\\", "/").rsplit("/",1)[1]}")
 
                 # Usuń zapisane dane z bufora
                 buffer = BytesIO(audio_segment[fragment_duration:].raw_data)

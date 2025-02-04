@@ -26,19 +26,19 @@ def save_text_to_txt(filename: str, transcribed_text: str, update_status: any, t
         full_transcript_path = base_path + "/" + f"full-{timestamp}.txt"
 
         txt_path = (transcription_folder + f"/{filename}.txt").replace("\\", "/")
-        log.debug(f"Txt folder path: {txt_path}")
+        # log.debug(f"Txt folder path: {txt_path}")
 
     try:
         with open(txt_path, 'a', encoding='utf-8') as file:
             file.write(transcribed_text, )
-            log_status("Dokonano zapisu tekstu do pliku txt", "success", update_status)
+            log_status(f"Dokonano zapisu txt: {txt_path.rsplit("/",1)[1]}", "success", update_status)
 
         format_text(txt_path, 80)
 
         if transcription_folder is not None:
             with open(full_transcript_path, 'a', encoding='utf-8') as file:
                 file.write(transcribed_text, )
-            log_status("Dokonano zapisu tekstu do pliku txt z pełną transkrypcją", "success", update_status)
+            log_status(f"Dokonano zapisu txt (pelna transkrypcja): {txt_path.rsplit("/",1)[1]}", "success", update_status)
 
 
         return txt_path
@@ -82,4 +82,4 @@ def format_text(txt_path: str, line_width: int = 80):
             if line_buffer:
                 f.write(line_buffer.strip() + "\n")
 
-    print(f"Plik TXT zapisano jako '{txt_path}'.")
+    # print(f"Plik TXT zapisano jako '{txt_path}'.")

@@ -3,13 +3,16 @@ import threading
 
 from recorder_audio import start_recording, stop_recording
 from screenshots import select_area, monitor_and_capture, create_output_folder, stop_monitor_and_capture
+from app.transcriptor import transcribe_audio_from_folder
 from app.utilities.recording_utils import create_output_folder
+from loguru import logger as log
 
 # Flaga kontrolująca zrzuty ekranu
 recording_active = False
 screenshot_thread = None
+transcriptor_thread = None
 
-def start_recording_and_screenshots(update_status, selected_audio_device, app):
+def start_recording_and_screenshots(update_status, selected_audio_device, app, transription_false_update):
     """
     Funkcja uruchamiająca jednocześnie nagrywanie dźwięku i zrzuty ekranu.
 
@@ -17,8 +20,9 @@ def start_recording_and_screenshots(update_status, selected_audio_device, app):
         update_status: Funkcja do aktualizacji statusu w GUI.
         selected_audio_device: Nazwa wybranego urządzenia audio.
         app: Główna instancja Tkinter.
+        transription_false_update: metoda gui, odblokowuje przycisk play
     """
-    global recording_active, screenshot_thread
+    global recording_active, screenshot_thread, transcriptor_thread
     capture_area=None
 
     # Tworzenie folderu na zrzuty ekranu
@@ -38,14 +42,25 @@ def start_recording_and_screenshots(update_status, selected_audio_device, app):
             return
         monitor_and_capture(capture_area, output_folders[2])
 
+    def run_transcription():
+        global recording_active
+        transcribe_status = transcribe_audio_from_folder(output_folders[1], update_status, app, transription_false_update)
+
+        if transcribe_status is not None:
+            log.info("Nie udało się przeprowadzić transkrypcji audio.")
+        else:
+            log.info("Sukces. Dokonano pełnej transkrypcji audio.")
+
     # Uruchomienie nagrywania dźwięku w osobnym wątku
     audio_thread = threading.Thread(target=start_recording, args=(update_status, selected_audio_device, output_folders[1]))
     screenshot_thread = threading.Thread(target=run_screenshots)
+    transcriptor_thread = threading.Thread(target=run_transcription)
 
     audio_thread.start()
     screenshot_thread.start()
+    transcriptor_thread.start()
 
-    app.after(0, lambda: update_status("Rozpoczęto nagrywanie dźwięku i zrzuty ekranu."))
+    app.after(0, lambda: update_status("Rozpoczęto nagrywanie dźwięku i zrzuty ekranu. Rozpoczęto transkrypcje."))
 
 def stop_recording_and_screenshots(update_status):
     """
