@@ -32,6 +32,7 @@ from app.start_recording_and_screenshots import start_recording_and_screenshots,
 from app.utilities.logger import log_status
 from app.utilities.mail_sender import send_email
 from app.utilities.mail_sender import send_email
+from app.utilities.pdf_generator import generate_pdf_from_files
 from recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
@@ -596,6 +597,102 @@ show_transcription_button = create_circle_button(
 )
 show_transcription_button.config(font=("Arial", 22))
 show_transcription_button.grid(row=0, column=2, padx=10)
+
+
+def generate_notes():
+    """
+    Wyświetla okno wyboru folderu spotkania, umożliwiając użytkownikowi zaznaczenie jednego folderu.
+    """
+    meetings_folder = "./spotkania"
+    meeting_dirs = [d for d in os.listdir(meetings_folder) if os.path.isdir(os.path.join(meetings_folder, d))]
+    meeting_dirs.sort()
+
+    if not meeting_dirs:
+        messagebox.showwarning("Brak spotkań", "Nie znaleziono żadnych folderów spotkań.")
+        return
+
+    # Tworzenie okna wyboru spotkania
+    meeting_window = tk.Toplevel()
+    meeting_window.title("Wybór spotkania")
+    meeting_window.geometry("400x450")
+    meeting_window.configure(bg="#ebe4d6")
+
+    tk.Label(meeting_window, text="Wybierz spotkanie:", bg="#ebe4d6", font=("Arial", 12)).pack(pady=10)
+
+    # Tworzenie ramki do przewijania
+    frame = tk.Frame(meeting_window)
+    frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+    canvas = tk.Canvas(frame, bg="#ebe4d6")
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas, bg="#ebe4d6")
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    window_id = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=370)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    scrollbar.pack(side="right", fill="y")
+    canvas.pack(side="left", fill="both", expand=True)
+
+    # Dodanie funkcjonalności do przewijania myszką
+    def _on_mouse_wheel(event):
+        canvas.yview_scroll(-1 * (event.delta // 120), "units")
+
+    canvas.bind_all("<MouseWheel>", _on_mouse_wheel)
+
+    # Zmienna do przechowywania wyboru
+    selected_meeting = tk.StringVar(value=0)
+
+    # Tworzenie przycisków radiowych dla każdego folderu spotkania
+    for meeting in meeting_dirs:
+        tk.Radiobutton(
+            scrollable_frame,
+            text=meeting,
+            variable=selected_meeting,
+            value=meeting,
+            bg="#ebe4d6",
+            font=("Arial", 10)
+        ).pack(anchor="w", padx=10, pady=2)
+
+    def save_meeting_selection():
+        if not selected_meeting.get():
+            messagebox.showwarning("Brak wyboru", "Proszę wybrać spotkanie przed zatwierdzeniem.")
+            return
+
+        meeting_folder = os.path.join("./spotkania", selected_meeting.get())
+
+        output_file = os.path.join(meeting_folder, f"raport_{selected_meeting.get()}.pdf")
+        screenshot_folder = os.path.join(meeting_folder, f"screenshots-{selected_meeting.get()}")
+        transcription_folder = os.path.join(meeting_folder, f"txt-{selected_meeting.get()}")
+
+        if not os.path.exists(screenshot_folder) or not os.path.exists(transcription_folder):
+            messagebox.showerror("Błąd", "Brak wymaganych folderów screenshotów lub transkrypcji.")
+            return
+
+        generate_pdf_from_files(output_file, screenshot_folder, transcription_folder)
+        messagebox.showinfo("Sukces", f"Wygenerowano raport: {output_file}")
+        os.startfile(output_file)
+        meeting_window.destroy()
+        if not selected_meeting.get():
+            messagebox.showwarning("Brak wyboru", "Proszę wybrać spotkanie przed zatwierdzeniem.")
+            return
+        meeting_window.destroy()
+        messagebox.showinfo("Potwierdzenie", f"Wybrano spotkanie: {selected_meeting.get()}")
+
+    # Przycisk zapisu wyboru
+    save_button = tk.Button(
+        meeting_window,
+        text="✔️ Zapisz",
+        command=save_meeting_selection,
+        font=("Arial", 12),
+        bg="#ad9d99",
+        fg="black"
+    )
+    save_button.pack(pady=10)
 
 
 # Generuj notatki
