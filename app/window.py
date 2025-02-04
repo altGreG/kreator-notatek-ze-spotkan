@@ -26,9 +26,10 @@ Ten plik zawiera następujące funkcje:
 # TODO(altGreG): Zaktualizować docstrings
 
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, ttk
 
 from app.start_recording_and_screenshots import start_recording_and_screenshots, stop_recording_and_screenshots
+from app.utilities.mail_sender import send_email
 from recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
@@ -429,7 +430,138 @@ stop_button = create_circle_button(
 stop_button.config(font=("Arial", 24))
 stop_button.grid(row=0, column=1, padx=10)
 
-# Pokaż transkrypcję
+def find_all_pdfs():
+    """
+    Przeszukuje wszystkie podfoldery w katalogu spotkania w poszukiwaniu plików PDF.
+
+    Returns:
+        list: Posortowana lista pełnych ścieżek do znalezionych plików PDF.
+    """
+    pdf_files = []  # Lista przechowująca znalezione pliki PDF
+    meetings_folder =".\\spotkania"
+    # Przeszukaj katalog spotkania rekurencyjnie
+    for root, _, files in os.walk(meetings_folder):
+        for file in files:
+            if file.endswith(".pdf"):  # Szukamy tylko plików PDF
+                pdf_files.append(os.path.join(root, file))  # Dodaj pełną ścieżkę do listy
+
+    # Posortuj listę plików PDF według nazw plików
+    pdf_files.sort()
+    return pdf_files
+
+def show_email_input_window(selected_pdf_path):
+    """
+    Wyświetla okno do wprowadzenia adresu email do wysłania wybranego PDF.
+    """
+    email_window = tk.Toplevel(app)
+    email_window.title("Wyślij raport PDF")
+    email_window.geometry("400x200")
+    email_window.configure(bg="#ebe4d6")
+
+    tk.Label(email_window, text="Podaj swój adres e-mail:", bg="#ebe4d6", font=("Arial", 12)).pack(pady=10)
+    email_entry = tk.Entry(email_window, font=("Arial", 12), width=30)
+    email_entry.pack(pady=5)
+
+    tk.Label(email_window, text=f"Wybrany plik:", bg="#ebe4d6", font=("Arial", 10)).pack()
+    tk.Label(email_window, text=selected_pdf_path, bg="#ebe4d6", font=("Arial", 10), wraplength=350).pack(pady=5)
+
+    def confirm_email():
+        send_email(email_entry.get().strip(), selected_pdf_path)
+        recipient_email = email_entry.get().strip()
+        if not recipient_email:
+            messagebox.showwarning("Brak adresu e-mail", "Proszę podać adres e-mail przed wysłaniem.")
+            return
+        messagebox.showinfo("Potwierdzenie", f"E-mail zostanie wysłany na: {recipient_email} z plikiem {selected_pdf_path}")
+        email_window.destroy()
+
+    # Przycisk potwierdzenia
+    confirm_button = tk.Button(
+        email_window,
+        text="✔️ Wyślij",
+        command=confirm_email,
+        font=("Arial", 12),
+        bg="#ad9d99",
+        fg="black"
+    )
+    confirm_button.pack(pady=10)
+
+def show_pdf_selection_window():
+    """
+    Wyświetla okno wyboru raportu PDF, umożliwiając użytkownikowi zaznaczenie jednego pliku.
+    """
+    pdf_files = find_all_pdfs()
+
+    if not pdf_files:
+        messagebox.showwarning("Brak raportów", "Nie znaleziono żadnych raportów PDF.")
+        return
+
+    # Tworzenie okna wyboru PDF
+    pdf_window = tk.Toplevel(app)
+    pdf_window.title("Wybór raportu PDF")
+    pdf_window.geometry("400x450")
+    pdf_window.configure(bg="#ebe4d6")
+
+    tk.Label(pdf_window, text="Wybierz raport PDF:", bg="#ebe4d6", font=("Arial", 12)).pack(pady=10)
+
+    # Tworzenie ramki do przewijania
+    frame = tk.Frame(pdf_window)
+    frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+    canvas = tk.Canvas(frame, bg="#ebe4d6")
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas, bg="#ebe4d6")
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    window_id = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=370)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    scrollbar.pack(side="right", fill="y")
+    canvas.pack(side="left", fill="both", expand=True)
+
+    # Dodanie funkcjonalności do przewijania myszką
+    def _on_mouse_wheel(event):
+        canvas.yview_scroll(-1 * (event.delta // 120), "units")
+
+    canvas.bind_all("<MouseWheel>", _on_mouse_wheel)
+
+    # Zmienna do przechowywania wyboru
+    selected_pdf = tk.StringVar(value=0)
+
+    # Tworzenie przycisków radiowych dla każdego pliku PDF
+    for pdf in pdf_files:
+        pdf_name = os.path.basename(pdf)  # Pobranie tylko nazwy pliku
+        tk.Radiobutton(
+            scrollable_frame,
+            text=pdf_name,
+            variable=selected_pdf,
+            value=pdf,
+            bg="#ebe4d6",
+            font=("Arial", 10)
+        ).pack(anchor="w", padx=10, pady=2)
+
+    def save_selection():
+        if not selected_pdf.get():
+            messagebox.showwarning("Brak wyboru", "Proszę wybrać raport PDF przed zatwierdzeniem.")
+            return
+        pdf_window.destroy()
+        show_email_input_window(selected_pdf.get())
+
+    # Przycisk zapisu wyboru
+    save_button = tk.Button(
+        pdf_window,
+        text="✔️ Zapisz",
+        command=save_selection,
+        font=("Arial", 12),
+        bg="#ad9d99",
+        fg="black"
+    )
+    save_button.pack(pady=10)
+
+# Przycisk otwierający okno wyboru PDF
 show_transcription_button = create_circle_button(
     button_frame,
     x=0,
@@ -438,10 +570,11 @@ show_transcription_button = create_circle_button(
     text="📄",
     fill_color="#ad9d99",
     outline_color="black",
-    command=show_transcription_window
+    command=show_pdf_selection_window
 )
 show_transcription_button.config(font=("Arial", 22))
 show_transcription_button.grid(row=0, column=2, padx=10)
+
 
 # Generuj notatki
 notes_button = create_circle_button(
@@ -480,27 +613,6 @@ def get_audio_devices():
         return []
 
 
-def find_all_pdfs():
-    """
-    Przeszukuje wszystkie podfoldery w katalogu spotkania w poszukiwaniu plików PDF.
-
-    Args:
-        meetings_folder (str): Ścieżka do folderu, w którym znajdują się podfoldery ze spotkaniami.
-
-    Returns:
-        list: Posortowana lista pełnych ścieżek do znalezionych plików PDF.
-    """
-    pdf_files = []  # Lista przechowująca znalezione pliki PDF
-    meetings_folder =".\spotkania"
-    # Przeszukaj katalog spotkania rekurencyjnie
-    for root, _, files in os.walk(meetings_folder):
-        for file in files:
-            if file.endswith(".pdf"):  # Szukamy tylko plików PDF
-                pdf_files.append(os.path.join(root, file))  # Dodaj pełną ścieżkę do listy
-
-    # Posortuj listę plików PDF według nazw plików
-    pdf_files.sort()
-    return pdf_files
 
 # Uruchomienie aplikacji
 app.mainloop()
