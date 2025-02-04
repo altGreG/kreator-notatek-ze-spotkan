@@ -1,4 +1,4 @@
-from app.transcriptor import transcribe_with_gcloud
+from app.utilities.api.gc_api import transcribe_with_gcloud
 from loguru import logger as log
 
 log.info("Test funkcji służącej do transkrypcji audio przy pomocy modelu Whisper od OpenAI.")
