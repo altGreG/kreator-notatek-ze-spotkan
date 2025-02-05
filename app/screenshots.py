@@ -1,3 +1,29 @@
+# app/screenshots.py
+
+"""Moduł monitorowania ekranu i zapisu zrzutów ekranu
+
+Skrypt umożliwia użytkownikowi wybór obszaru ekranu do monitorowania, a następnie automatyczne wykonywanie zrzutów ekranu w przypadku wykrycia znaczących zmian w obrazie.
+
+Wymagane zależności
+
+Aby uruchomić skrypt, należy zainstalować następujące pakiety w środowisku Python:
+
+    - Pillow: Biblioteka do obsługi grafiki, w tym zrzutów ekranu
+    - loguru: Rozbudowany system logowania
+
+Do prawidłowego działania aplikacji należy zaimportować:
+
+    - create_output_folder z modułu app.utilities.recording_utils, służącą do tworzenia folderów wyjściowych.
+
+Skrypt może być używany jako moduł i zawiera następujące funkcje:
+
+    * select_area — pozwala użytkownikowi zaznaczyć obszar ekranu za pomocą dynamicznej nakładki GUI.
+    * monitor_and_capture — monitoruje zmiany w wybranym obszarze ekranu i zapisuje zrzuty w przypadku wykrycia zmian.
+    * stop_monitor_and_capture — zatrzymuje proces monitorowania.
+
+Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, logowania oraz komunikatów dla użytkownika.
+"""
+
 import os
 import time
 from tkinter import Tk, Canvas, Button

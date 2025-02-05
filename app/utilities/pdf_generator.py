@@ -1,3 +1,31 @@
+# app/utilities/pdf_generator.py
+
+"""Moduł generowania pliku PDF z zrzutów ekranu i transkrypcji
+
+Skrypt umożliwia generowanie pliku PDF, który łączy zrzuty ekranu (*.jpg) oraz transkrypcje (*.txt),
+sortując pliki na podstawie timestampów zawartych w nazwach plików. Zrzuty ekranu i transkrypcje są dodawane
+do pliku PDF w odpowiedniej kolejności.
+
+Wymagane zależności
+
+Aby uruchomić skrypt, należy zainstalować następujące pakiety w środowisku Python:
+
+    - reportlab: Biblioteka do generowania plików PDF
+
+Do prawidłowego działania aplikacji należy zaimportować:
+
+    - generate_pdf_from_files z modułu app.pdf_generator, która generuje plik PDF na podstawie plików z folderów
+      zawierających zrzuty ekranu i transkrypcje.
+
+Skrypt może być używany jako moduł i zawiera następującą funkcję:
+
+    * generate_pdf_from_files - Generuje plik PDF na podstawie zrzutów ekranu i transkrypcji, sortując je według
+      timestampów w nazwach plików.
+
+Każda funkcja zawiera mechanizmy obsługi błędów oraz odpowiednie komunikaty dla użytkownika.
+"""
+
+
 import os
 from datetime import datetime
 from reportlab.lib.pagesizes import A4

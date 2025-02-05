@@ -1,3 +1,22 @@
+#app/utilities/recording_utils.py
+
+"""Moduł zarządzania plikami spotkań
+
+Skrypt umożliwia automatyczne tworzenie katalogów na potrzeby zrzutów ekranu, nagrań audio oraz transkrypcji, a także agregację plików tekstowych w spójne dokumenty.
+
+Wymagane zależności
+
+Do poprawnego działania skryptu nie są wymagane dodatkowe pakiety zewnętrzne poza standardowymi bibliotekami Pythona.
+
+Skrypt może być używany jako moduł i zawiera następujące funkcje:
+
+    * create_output_folder — tworzy hierarchię katalogów dla bieżącego spotkania, w tym podfoldery dla nagrań audio, transkrypcji i zrzutów ekranu.
+    * txt_files_aggregation — łączy poszczególne fragmenty transkrypcji z plików .txt między zrzutami ekranu, sortując je chronologicznie oraz przenosząc stare pliki do folderu archiwum.
+
+Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, sortowania plików i organizacji struktury katalogów dla lepszej przejrzystości danych ze spotkań.
+"""
+
+
 from datetime import datetime
 import os
 import glob

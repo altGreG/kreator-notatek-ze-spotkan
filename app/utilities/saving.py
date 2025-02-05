@@ -1,3 +1,26 @@
+# app/utilities/saving.py
+
+"""Moduł zapisu transkrypcji tekstowych
+
+Ten skrypt pozwala na zapis przetworzonych transkrypcji audio do plików tekstowych.
+
+Wymagane zależności
+
+Skrypt wymaga, aby w środowisku Pythona, w którym uruchamiasz ten skrypt, była zainstalowana biblioteka:
+
+    - loguru: Rozbudowany system logowania
+
+Do poprawnego działania skryptu należy zaimportować funkcję:
+
+    - log_status z modułu app.utilities.logger, służącą do logowania komunikatów statusowych.
+
+Ten plik może zostać zaimportowany również jako moduł i zawiera następujące funkcje:
+
+    * save_text_to_txt - zapis przetranskrybowanego tekstu do pliku .txt
+    * format_text - formatowanie zawartości pliku tekstowego zgodnie z podaną maksymalną szerokością linii
+
+"""
+
 import os
 from loguru import logger as log
 from app.utilities.logger import log_status

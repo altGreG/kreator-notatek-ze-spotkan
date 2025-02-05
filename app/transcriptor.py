@@ -1,32 +1,31 @@
 # app/transcriptor.py
 
-"""Narzędzia transkrypcji audio
+"""Moduł transkrypcji audio
 
-Ten skrypt pozwala użytkownikowi na transkrypcję plików audio do plików tekstowych.
+Skrypt umożliwia transkrypcję plików audio do formatu tekstowego oraz ekstrakcję ścieżki audio z plików wideo.
 
-Skrypt wymaga aby w środowisku Pythona w którym uruchamiasz ten skrypt zostały
-zainstalowane następujące zależności:
+Wymagane zależności
 
-    - `openai-whisper`
-    - `torch`
-    - `torchvision`
-    - `torchaudio`
-    - `google-cloud-speech`
-    - `protobuf`
-    - `loguru`
-    - setuptools-rust
+Aby uruchomić skrypt, należy zainstalować następujące pakiety w środowisku Python:
 
-Do poprawnego działania skryptu należy zaimportować następujące funkcje:
+    - openai-whisper: Model do transkrypcji mowy
+    - torch, torchvision, torchaudio: Narzędzia do przetwarzania danych audio
+    - loguru: Rozbudowany system logowania
+    - setuptools-rust: Wsparcie dla rozszerzeń w Rust
 
-    - `log_status` z modułu app.loger
+Do prawidłowego działania aplikacji należy zaimportować:
 
-Ten plik może zostać zaimportowany również jako moduł i zawiera następujące funkcje:
+    - log_status z modułu app.utilities.loger, służącą do logowania komunikatów statusowych.
+    - save_text_to_txt z modułu app.utilities.saving
 
-    * extract_audio_from_video - ekstrakcja audio z video
-    * transcribe_with_whisper_offline - transkrypcja audio z modelem Whisper na maszynie użytkownika
-    * transcribe_with_gcloud - transkrypcja audio w chmurze Google Cloud i usługu Speech To Text
+Skrypt może być używany jako moduł i zawiera następujące funkcje:
+
+    * extract_audio_from_video -  ekstrakcja ścieżki audio z plików wideo przy użyciu narzędzia ffmpeg.
+    * transcribe_with_whisper_offline -  transkrypcja plików audio lokalnie przy użyciu modelu Whisper.
+    * transcribe_audio_from_folder - automatyczna transkrypcja wszystkich plików audio z wybranego folderu.
+
+Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, logowania oraz komunikatów dla użytkownika.
 """
-
 
 import platform
 import subprocess
@@ -38,11 +37,10 @@ import time
 import warnings
 from loguru import logger as log
 from app.utilities.logger import log_status
-from app.saving import save_text_to_txt
+from app.utilities.saving import save_text_to_txt
 
 extracting_process = -1
 warnings.filterwarnings("ignore", module="whisper")
-
 
 def extract_audio_from_video(video_file_path: str, update_status: any) -> str | None:
     """
