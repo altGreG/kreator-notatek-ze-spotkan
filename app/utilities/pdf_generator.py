@@ -33,9 +33,11 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+from app.utilities.api.openai_api import summarize_transcription
+from textwrap import wrap
 
 
-def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
+def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder, full_transcription_path):
     """
     Generuje plik PDF na podstawie zrzutów ekranu (*.jpg) i transkrypcji (*.txt),
     sortując pliki według timestampów w nazwach.
@@ -44,6 +46,7 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
         output_pdf (str): Ścieżka do wyjściowego pliku PDF.
         screenshots_folder (str): Ścieżka do folderu zawierającego pliki zrzutów ekranu.
         transcripts_folder (str): Ścieżka do folderu zawierającego pliki transkrypcji.
+        full_transcription_path (str): Ścieżka do pełnej transkrypcji dla podsumowania AI.
     """
     # Rejestracja czcionki obsługującej polskie znaki
     styles_path = (os.getcwd().replace("\\", "/")).rsplit(r"/kreator-notatek-ze-spotkan")[0] + "/kreator-notatek-ze-spotkan/app/styles"
@@ -53,38 +56,61 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
 
     pdfmetrics.registerFont(TTFont("DejaVuSans", font_path))
 
-    # Pobierz listę plików w folderach
-    screenshots = [f for f in os.listdir(screenshots_folder) if f.endswith('.jpg')]
-    transcripts = [f for f in os.listdir(transcripts_folder) if f.endswith('.txt')]
-
-    # Wyciągnij timestampy z nazw plików i sortuj je
-    def extract_timestamp(filename):
-        return tuple(map(int, filename.split('.')[0].split('-')))
-
-    screenshots = sorted(screenshots, key=extract_timestamp)
-    transcripts = sorted(transcripts, key=extract_timestamp)
-
-    # Połącz listy i sortuj według timestampów
-    combined = sorted([(f, 'screenshot') for f in screenshots] + [(f, 'transcript') for f in transcripts],
-                      key=lambda x: extract_timestamp(x[0]))
+    # Pobierz podsumowanie AI
+    summary = summarize_transcription(full_transcription_path)
 
     # Tworzenie dokumentu PDF
     c = canvas.Canvas(output_pdf, pagesize=A4)
     width, height = A4
     margin = 50  # Marginesy dla tekstu
 
+    ### 1️⃣ Strona tytułowa ###
+    c.setFont("DejaVuSans", 22)
+    c.drawCentredString(width / 2, height - 150, "📄 RAPORT ZE SPOTKANIA 📄")
+
+    c.setFont("DejaVuSans", 12)
+
+    # Dostosowanie podsumowania - zawijanie tekstu
+    max_width = width - 2 * margin
+    wrapped_summary = wrap(summary, width=80)  # Dostosuj liczbę znaków w linii
+
+    # Ustawienie pozycji startowej dla tekstu podsumowania
+    y_position = height - 200
+
+    for line in wrapped_summary:
+        c.drawString(margin, y_position, line)
+        y_position -= 15  # Przesunięcie w dół
+
+        if y_position < 100:  # Jeśli zabraknie miejsca na stronie, nowa strona
+            c.showPage()
+            c.setFont("DejaVuSans", 12)
+            y_position = height - margin
+
+    c.showPage()  # Przejście do kolejnej strony po podsumowaniu
+
+    ### 2️⃣ Kolejne strony - zrzuty ekranu i transkrypcja ###
+    screenshots = sorted([f for f in os.listdir(screenshots_folder) if f.endswith('.jpg')])
+    transcripts = sorted([f for f in os.listdir(transcripts_folder) if f.endswith('.txt')])
+
+    def extract_timestamp(filename):
+        return tuple(map(int, filename.split('.')[0].split('-')))
+
+    screenshots = sorted(screenshots, key=extract_timestamp)
+    transcripts = sorted(transcripts, key=extract_timestamp)
+
+    combined = sorted([(f, 'screenshot') for f in screenshots] + [(f, 'transcript') for f in transcripts],
+                      key=lambda x: extract_timestamp(x[0]))
+
     y_position = height - margin
 
     for filename, file_type in combined:
         if file_type == 'screenshot':
             file_path = os.path.join(screenshots_folder, filename)
-            # Dodaj obraz do PDF
             try:
                 img = ImageReader(file_path)
                 img_width, img_height = img.getSize()
                 aspect_ratio = img_width / img_height
 
-                # Przeskaluj obraz, aby pasował do szerokości strony
                 display_width = width - 2 * margin
                 display_height = display_width / aspect_ratio
 
@@ -92,21 +118,18 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
                     c.showPage()
                     y_position = height - margin
 
-                c.drawImage(img, margin, y_position - display_height, display_width, display_height,
-                            preserveAspectRatio=True)
-                y_position -= (display_height + 20)  # Przestrzeń po obrazie
-                print(f"Dodano obraz: {filename}")
+                c.drawImage(img, margin, y_position - display_height, display_width, display_height, preserveAspectRatio=True)
+                y_position -= (display_height + 20)
             except Exception as e:
                 print(f"Błąd podczas dodawania obrazu {filename}: {e}")
 
         elif file_type == 'transcript':
             file_path = os.path.join(transcripts_folder, filename)
-            # Dodaj tekst do PDF
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     text = f.read()
 
-                c.setFont("DejaVuSans", 10)  # Ustaw czcionkę obsługującą polskie znaki
+                c.setFont("DejaVuSans", 10)
                 lines = text.splitlines()
 
                 for line in lines:
@@ -122,7 +145,6 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
 
                             if y_position < margin:
                                 c.showPage()
-                                c.setFont("DejaVuSans", 10)  # Ustaw czcionkę na nowej stronie
                                 y_position = height - margin
 
                             line_buffer = word + " "
@@ -133,19 +155,14 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder):
 
                         if y_position < margin:
                             c.showPage()
-                            c.setFont("DejaVuSans", 10)
                             y_position = height - margin
-
-                print(f"Dodano transkrypcję: {filename}")
 
             except Exception as e:
                 print(f"Błąd podczas dodawania tekstu {filename}: {e}")
 
-        # Dodaj nową stronę, jeśli zabraknie miejsca
         if y_position < margin:
             c.showPage()
             y_position = height - margin
 
-    # Zakończ dokument PDF
     c.save()
     print(f"Raport PDF został wygenerowany: {output_pdf}")

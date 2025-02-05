@@ -673,8 +673,7 @@ def generate_notes():
         ).pack(anchor="w", padx=10, pady=2)
 
     def save_meeting_selection():
-        """Zapisuje wybór spotkania i generuje raport PDF.
-            """
+        """Zapisuje wybór spotkania i generuje raport PDF."""
         if not selected_meeting.get():
             messagebox.showwarning("Brak wyboru", "Proszę wybrać spotkanie przed zatwierdzeniem.")
             return
@@ -685,19 +684,24 @@ def generate_notes():
         screenshot_folder = os.path.join(meeting_folder, f"screenshots-{selected_meeting.get()}")
         transcription_folder = os.path.join(meeting_folder, f"txt-{selected_meeting.get()}")
 
+        # Szukamy pełnej transkrypcji (full-*.txt)
+        full_transcription_filename = f"full-{selected_meeting.get()}.txt"
+        full_transcription_path = os.path.join(meeting_folder, full_transcription_filename)
+
         if not os.path.exists(screenshot_folder) or not os.path.exists(transcription_folder):
             messagebox.showerror("Błąd", "Brak wymaganych folderów screenshotów lub transkrypcji.")
             return
 
-        generate_pdf_from_files(output_file, screenshot_folder, transcription_folder)
+        if not os.path.exists(full_transcription_path):
+            messagebox.showerror("Błąd", "Nie znaleziono pełnej transkrypcji do podsumowania.")
+            return
+
+        # Generowanie PDF z podsumowaniem
+        generate_pdf_from_files(output_file, screenshot_folder, transcription_folder, full_transcription_path)
         messagebox.showinfo("Sukces", f"Wygenerowano raport: {output_file}")
         os.startfile(output_file)
+
         meeting_window.destroy()
-        if not selected_meeting.get():
-            messagebox.showwarning("Brak wyboru", "Proszę wybrać spotkanie przed zatwierdzeniem.")
-            return
-        meeting_window.destroy()
-        messagebox.showinfo("Potwierdzenie", f"Wybrano spotkanie: {selected_meeting.get()}")
 
     # Przycisk zapisu wyboru
     save_button = tk.Button(
@@ -709,7 +713,6 @@ def generate_notes():
         fg="black"
     )
     save_button.pack(pady=10)
-
 
 # Generuj notatki
 notes_button = create_circle_button(

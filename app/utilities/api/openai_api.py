@@ -53,10 +53,10 @@ def summarize_transcription(file_path):
         response = client.chat.completions.create(
             model="gpt-4o",  # Użyj modelu GPT-4o
             messages=[
-                {"role": "system", "content": "Jesteś asystentem pomagającym podsumować transkrypcje w zwięzłej formie."},
-                {"role": "user", "content": f"Podsumuj ten tekst:\n\n{transcription_text}. Usuń halucynacje"}
+                {"role": "system", "content": "Jesteś asystentem pomagającym podsumować transkrypcje w zwięzłej formie wraz ze szczegółami."},
+                {"role": "user", "content": f"Podsumuj ten tekst:\n\n{transcription_text}. Wypisz najważniejsze punkty. Usuń halucynacje"}
             ],
-            max_tokens=200,  # Maksymalna długość podsumowania
+            max_tokens=1000,  # Maksymalna długość podsumowania
             temperature=0.5  # Kontrola losowości w generacji tekstu
         )
 
