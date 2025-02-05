@@ -23,18 +23,23 @@ Ten plik może zostać zaimportowany również jako moduł i zawiera następują
 
 import os
 from loguru import logger as log
+from typing import Callable
 from app.utilities.logger import log_status
 
-def save_text_to_txt(filename: str, transcribed_text: str, update_status: any, transcription_folder: str | None = None):
+def save_text_to_txt(filename: str, transcribed_text: str, update_status: Callable[[str], None], transcription_folder: str | None = None) -> str | None:
     """
     Zapis przetranskrybowanego tekstu do pliku .txt
-    (pliki są zapisywane w folderze app/txt)
 
     Args:
-        filename: nazwa dla pliku txt
-        transcribed_text: przetranskrybowany tekst z pliku audio
-        update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
-        transcription_folder: ścieżka do folderu na tranksrypcję freagmentów nagrania
+        filename:
+            nazwa dla pliku txt
+        transcribed_text:
+            przetranskrybowany tekst z pliku audio
+        update_status:
+            Funkcja aktualizująca wiadomości statusu w aplikacji GUI.
+        transcription_folder:
+            ścieżka do folderu na tranksrypcję fragmentów nagrania
+
     Returns:
         string z ścieżką do zapisanego pliku txt | None
     """
@@ -47,9 +52,7 @@ def save_text_to_txt(filename: str, transcribed_text: str, update_status: any, t
     else:
         base_path, timestamp = (transcription_folder.replace("\\", "/")).rsplit("/txt-", 1)
         full_transcript_path = base_path + "/" + f"full-{timestamp}.txt"
-
         txt_path = (transcription_folder + f"/{filename}.txt").replace("\\", "/")
-        # log.debug(f"Txt folder path: {txt_path}")
 
     try:
         with open(txt_path, 'a', encoding='utf-8') as file:
@@ -63,24 +66,23 @@ def save_text_to_txt(filename: str, transcribed_text: str, update_status: any, t
                 file.write(transcribed_text, )
             log_status(f"Dokonano zapisu txt (pelna transkrypcja): {txt_path.rsplit("/",1)[1]}", "success", update_status)
 
-
         return txt_path
     except Exception as err:
         log_status(f"Wystąpił problem w czasie zapisu do pliku txt: {err}", "error", update_status)
         return None
 
-def format_text(txt_path: str, line_width: int = 80):
+def format_text(txt_path: str, line_width: int = 80) -> None:
     """
-    Funkcja przyjmuje ścieżke do txt jako argument wejściowy i zapisuje treść pliku txt pod ścieżką do sformatowanego
-    pliku TXT.
+    Funkcja dokonująca formatu pliku txt, do odpowiedniej szerokości linii
 
     Arguments:
-        text_path: Ścieżka pliku TXT.
-        line_width: Maksymalna szerokość linii w znakach.
+        txt_path:
+            Ścieżka pliku TXT
+        line_width:
+            Maksymalna szerokość linii w znakach.
     """
 
     text = ""
-
     with open(txt_path, 'r', encoding='utf-8') as f:
         text = f.read()
 
@@ -104,5 +106,3 @@ def format_text(txt_path: str, line_width: int = 80):
             # Zapis pozostałości linii (jeśli istnieje)
             if line_buffer:
                 f.write(line_buffer.strip() + "\n")
-
-    # print(f"Plik TXT zapisano jako '{txt_path}'.")

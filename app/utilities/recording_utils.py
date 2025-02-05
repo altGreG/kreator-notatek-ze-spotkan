@@ -16,18 +16,19 @@ Skrypt może być używany jako moduł i zawiera następujące funkcje:
 Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, sortowania plików i organizacji struktury katalogów dla lepszej przejrzystości danych ze spotkań.
 """
 
-
 from datetime import datetime
 import os
 import glob
 from typing import List, Any
 
-
 def create_output_folder() -> list[str]:
-    """Tworzy folder na zrzuty ekranu i nagrania audio.
+    """Tworzy foldery wynikowe na zapisywane pliki .jpg, .txt i .mp3
+
+    Funkcja tworzy folder główny a nim trzy podfoldery na zrzuty ekranu, nagrane fragmenty audio
+    oraz tekst z transkrypcji.
 
     Returns:
-        list[str, str, str] -- [meeting_directory, recording_directory, screenshots_directory]
+        Lista zawieracjąca ścieżki do folderów [meeting_directory, recording_directory, screenshots_directory, transcription_directory]
     """
 
     if (os.getcwd().replace("\\", "/")).rsplit("/", 1)[1] == "app":
@@ -63,13 +64,15 @@ def txt_files_aggregation(meeting_folder: str) -> None:
     Funkcja łączy poszczególne fragmenty transkrypcji między screenami ekranu w większą całość.
 
     Funkcja buduje listę ścieżek do txt i jpg. Sortuje ją po timestampie. Następnie łączy pliki transkrypcji,
-    która była między poszczególnymi momentami wykonania zrzutaów ekranu w jeden plik txt, który nosi nazwę
+    która była między poszczególnymi momentami wykonania zrzutów ekranu w jeden plik txt, który nosi nazwę
     najwcześniejszego timestampu audio z grupy.
 
-    Stare pliki funkcja przenosi do folderu archiwum w folderze z transkrypcjami (timestamp/txt-timestamp/archiwum).
+    Notes:
+        Stare pliki funkcja przenosi do folderu archiwum w folderze z transkrypcjami (timestamp/txt-timestamp/archiwum).
 
     Arguments:
-        meeting_folder: ścieżka do folderu z danymi danego spotkania
+        meeting_folder:
+            ścieżka do folderu głównego spotkania
     """
 
     timestamp = (meeting_folder.replace("\\", "/")).rsplit("/", 1)[1]
@@ -88,8 +91,6 @@ def txt_files_aggregation(meeting_folder: str) -> None:
     files.sort(key= lambda f: ((f.replace("\\", "/")).rsplit("/", 1)[1]).rsplit(".", 1)[0])
     for file in files:
         print(file)
-
-
 
     done_files = []
     temp_done_list = []

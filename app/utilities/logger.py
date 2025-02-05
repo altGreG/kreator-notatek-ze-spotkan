@@ -36,14 +36,19 @@ Uwaga: Jeśli chcemy po prostu wypisać coś w kosoli bez aktualizacji statusu a
 """
 
 from loguru import logger as log
+from typing import Callable
 
-def log_status(msg, level,  update_status):
+def log_status(msg: str, level: str,  update_status: str) -> None:
     """
     Funkcja wypisuje logi w konsoli i uaktualnia status aplikacji GUI
 
-    :param msg: wiadomość do wyświetlenia
-    :param level: poziom określający znaczenie wiadomości
-    :param update_status: metoda aplikacji gui służąca do aktualizacji wiadomości statusu w GUI
+    Arguments:
+        msg:
+            wiadomość do wyświetlenia
+        level:
+            poziom określający znaczenie wiadomości
+        update_status:
+            unkcja aktualizująca wiadomości statusu w aplikacji GUI.
     """
 
     # wartość typu str, oznacza,że tylko testujemy bez udziału GUI

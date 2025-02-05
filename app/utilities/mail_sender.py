@@ -36,17 +36,20 @@ import os
 import logging
 from loguru import logger as log
 
-def send_email(recipient_email, file_path):
+def send_email(recipient_email: str, file_path: str) -> str:
     """
     Wysyła e-mail z załącznikiem na podany adres.
 
     Args:
-        recipient_email (str): Adres e-mail odbiorcy.
-        file_path (str): Ścieżka do pliku, który ma być załączony.
+        recipient_email:
+            Adres e-mail odbiorcy.
+        file_path:
+            Ścieżka do pliku, który ma być załączony.
 
     Returns:
-        str: "Success!" jeśli wysyłanie zakończyło się sukcesem, inaczej wiadomość błędu.
+        "Success!" jeśli wysyłanie zakończyło się sukcesem, inaczej wiadomość błędu.
     """
+
     sender_email = "gienio.enterprise@gmail.com"
     load_dotenv()
     password = os.getenv("EMAIL_PASSWORD")
