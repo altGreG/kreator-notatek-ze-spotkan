@@ -7,7 +7,6 @@ theme:
 plugins:
   - mkdocstrings
 
-
 nav:
   - Strona Główna: index.md
   - Konfiguracja: configuration.md
