@@ -42,53 +42,6 @@ from app.utilities.saving import save_text_to_txt
 extracting_process = -1
 warnings.filterwarnings("ignore", module="whisper")
 
-def extract_audio_from_video(video_file_path: str, update_status: any) -> str | None:
-    """
-    Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`
-
-    Args:
-        video_file_path: ścieżka do pliku z video
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
-
-    Returns:
-        ścieżka do pliku audio | None w razie błędu
-    """
-    global extracting_process
-
-    system_name = platform.system()
-    filename = ((video_file_path.replace("\\", "/")).split("/")[-1]).split(".")[0]
-    output_dir = (video_file_path.replace("\\", "/")).rsplit("/", 1)[0] + "/audio"
-    os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
-    filename_and_path = output_dir + "/" + filename
-    audio_ext = "mp3"
-
-    log_status("Ekstrakcja audio w toku...", "info", update_status)
-    log.debug(f"Scieżka do pliku video: {video_file_path}. System: {system_name}")
-    if system_name == "Windows":
-        try:
-            # TODO(altGreG): Po testach, usunąć opcję -t z komendy (-t mówi jak długi kawałek nagrania przekonwertować)
-            extracting_process = subprocess.call(["ffmpeg", "-y", "-i", video_file_path, "-t", "00:00:50.0", f"{filename_and_path}.{audio_ext}"],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.STDOUT)
-        except Exception as err:
-            log_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}", "error", update_status)
-            return None
-    elif system_name == "Linux":
-        try:
-            extracting_process = subprocess.call(["ffmpeg", "-y", "-i", video_file_path, f"{filename_and_path}.{audio_ext}"],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.STDOUT)
-        except Exception as err:
-            log_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}", "error", update_status)
-            return None
-
-    if extracting_process != 0:
-        log_status(f"Błąd w czasie ekstrakcji audio z wideo (ffmpeg).\nKod błędu: {extracting_process}", "error", update_status)
-        return None
-    else:
-        log_status("Sukces. Dokonano ekstrakcji audio z wideo.", "success", update_status)
-        log.debug(f"Ścieżka do pliku audio: {filename_and_path}.{audio_ext}")
-        return f"{filename_and_path}.{audio_ext}"
 
 def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) -> tuple[str, str | None]:
     """

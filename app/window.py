@@ -175,49 +175,6 @@ def show_help() -> None:
     url = "https://github.com/altGreG/kreator-notatek-ze-spotkan/blob/main/docs/configuration.md"
     webbrowser.open_new_tab(url)
 
-def show_transcription_window():
-    """
-    Otwiera nowe okno do wyświetlania transkrypcji z paskiem przewijania, z możliwością zmiany rozmiaru.
-    """
-    # Sprawdź, czy okno transkrypcji już istnieje
-    if hasattr(show_transcription_window, "transcription_window") and show_transcription_window.transcription_window.winfo_exists():
-        show_transcription_window.transcription_window.deiconify()  # Przywróć okno, jeśli zostało zminimalizowane
-        return
-
-    # Tworzenie nowego okna
-    transcription_window = tk.Toplevel(app)
-    transcription_window.title("Transkrypcja")
-    transcription_window.geometry("400x400")  # Początkowy rozmiar okna
-    transcription_window.configure(bg="#ebe4d6")
-
-    # Tworzenie ramki dla paska przewijania i pola tekstowego
-    frame = tk.Frame(transcription_window, bg="#ebe4d6")
-    frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-    # Tworzenie paska przewijania
-    scrollbar = tk.Scrollbar(frame)
-    scrollbar.pack(side="right", fill="y")
-
-    # Tworzenie pola tekstowego
-    transcription_text = tk.Text(
-        frame,
-        bg="white",
-        fg="black",
-        font=("Arial", 12),  # Czcionka dla tekstu w transkrypcji
-        relief=tk.FLAT,  # Brak obramowania tekstowego
-        state="disabled",  # Ustawienie pola jako tylko do odczytu
-        wrap="word",  # Zawijanie tekstu w oknie
-        yscrollcommand=scrollbar.set  # Powiązanie paska przewijania z polem tekstowym
-    )
-    transcription_text.pack(side="left", fill="both", expand=True)
-
-    # Powiązanie paska przewijania z polem tekstowym
-    scrollbar.config(command=transcription_text.yview)
-
-    # Przechowywanie odniesienia do pola tekstowego
-    show_transcription_window.transcription_text = transcription_text
-    show_transcription_window.transcription_window = transcription_window
-
 # Tworzenie głównego okna aplikacji
 app = tk.Tk()
 app.title("Aplikacja do Nagrywania Spotkań")
