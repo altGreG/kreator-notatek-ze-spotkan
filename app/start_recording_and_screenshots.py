@@ -34,6 +34,7 @@ from screenshots import select_area, monitor_and_capture, create_output_folder, 
 from app.transcriptor import transcribe_audio_from_folder
 from app.utilities.recording_utils import create_output_folder
 from loguru import logger as log
+from typing import Callable
 
 # Flaga kontrolująca zrzuty ekranu
 recording_active = False
@@ -90,10 +91,29 @@ def start_recording_and_screenshots(update_status, selected_audio_device, app, t
 
     app.after(0, lambda: update_status("Rozpoczęto nagrywanie dźwięku i zrzuty ekranu. Rozpoczęto transkrypcje."))
 
-def stop_recording_and_screenshots(update_status):
+def stop_recording_and_screenshots(update_status: Callable[[str], None]) -> None:
     """
-    Funkcja zatrzymująca nagrywanie dźwięku i zrzuty ekranu.
+    Zatrzymuje zarówno nagrywanie dźwięku, jak i proces wykonywania zrzutów ekranu.
+
+    Działanie:
+        - Wywołuje `stop_recording(update_status)`, aby zatrzymać nagrywanie dźwięku.
+        - Ustawia `recording_active` na `False`, co kończy proces monitorowania zmian na ekranie.
+        - Jeśli wątek `screenshot_thread` jest aktywny, wywołuje `stop_monitor_and_capture()` i czeka na jego zakończenie.
+        - Aktualizuje status w GUI.
+
+    Args:
+        update_status (Callable[[str], None]):
+            Funkcja aktualizująca status w interfejsie użytkownika.
+
+    Returns:
+        None
+
+    Notes:
+        - Funkcja zapewnia, że zarówno audio, jak i zrzuty ekranu są zatrzymane w odpowiedni sposób.
+        - Sprawdza, czy `screenshot_thread` jest aktywny przed próbą jego zatrzymania.
+        - Aktualizacja statusu w GUI informuje użytkownika o zakończeniu nagrywania.
     """
+
     global recording_active, screenshot_thread
 
     # Zatrzymaj nagrywanie dźwięku

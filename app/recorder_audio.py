@@ -93,10 +93,26 @@ def start_recording(update_status: any, selected_audio_device: str, recording_fo
             log_status(f"Błąd podczas rozpoczynania nagrywania dźwięku: {e}", "error", update_status)
 
 
-def _save_audio_fragments():
+def _save_audio_fragments() -> None:
     """
-    Funkcja zapisująca fragmenty audio co 10 sekund bez zatrzymywania nagrywania.
+    Zapisuje fragmenty audio co 10 sekund bez zatrzymywania nagrywania.
+
+    Działanie:
+        - Odczytuje dane audio z procesu FFmpeg w czasie rzeczywistym.
+        - Buforuje surowe dane audio.
+        - Po osiągnięciu 10-sekundowego fragmentu zapisuje go jako plik MP3.
+        - Przechowuje nieprzetworzone dane w buforze, aby zachować ciągłość nagrywania.
+
+    Returns:
+        None
+
+    Notes:
+        - Fragmenty audio są zapisywane w katalogu `recording_directory` jako pliki MP3.
+        - Nazwa każdego pliku to jego timestamp w formacie "HH-MM-SS.mp3".
+        - Nagrywanie odbywa się w formacie MP3 o bitrate 192 kbps.
+        - Jeśli `recording_active` zostanie ustawiona na `False`, nagrywanie zostanie zakończone.
     """
+
     global recording_process, recording_active, recording_directory
 
     buffer = BytesIO()
@@ -132,11 +148,27 @@ def _save_audio_fragments():
 
 def stop_recording(update_status: any) -> None:
     """
-    Funkcja kończąca nagrywanie dźwięku.
+    Zatrzymuje proces nagrywania dźwięku i zapisuje informację o zakończeniu.
+
+    Działanie:
+        - Ustawia flagę `recording_active` na `False`, co zatrzymuje nagrywanie fragmentów.
+        - Terminatuje proces FFmpeg odpowiedzialny za nagrywanie.
+        - Tworzy plik `koniec.txt` w katalogu nagrania, informując o zakończeniu nagrywania.
+        - Aktualizuje status w GUI.
 
     Args:
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
+        update_status (Callable | None):
+            Funkcja służąca do aktualizacji statusu w interfejsie użytkownika.
+
+    Returns:
+        None
+
+    Notes:
+        - Jeśli `recording_directory` jest ustawione, plik `koniec.txt` zostaje utworzony w folderze nagrania.
+        - Funkcja obsługuje błędy związane z zamykaniem procesu oraz tworzeniem pliku.
+        - W przypadku błędów, logi zawierają informacje diagnostyczne.
     """
+
     global recording_active, recording_process, recording_directory
 
     if update_status:

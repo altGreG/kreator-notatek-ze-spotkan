@@ -35,8 +35,26 @@ from app.utilities.recording_utils import create_output_folder
 
 recording_active = False
 
+
 def select_area():
-    """Pozwala użytkownikowi zaznaczyć obszar ekranu w nakładce."""
+    """
+    Tworzy nakładkę na ekranie, pozwalając użytkownikowi zaznaczyć obszar do przechwytywania.
+
+    Funkcja otwiera przezroczyste okno Tkinter jako nakładkę, umożliwiając użytkownikowi zaznaczenie
+    prostokątnego obszaru za pomocą myszy. Po wybraniu obszaru, zwraca jego współrzędne i rozmiar.
+
+    Returns:
+        list: Lista zawierająca cztery wartości [x, y, width, height], gdzie:
+            - x (int): Współrzędna X górnego lewego rogu zaznaczonego obszaru.
+            - y (int): Współrzędna Y górnego lewego rogu zaznaczonego obszaru.
+            - width (int): Szerokość zaznaczonego obszaru.
+            - height (int): Wysokość zaznaczonego obszaru.
+
+    Example:
+        >>> selected_area = select_area()
+        >>> print(selected_area)
+        [100, 150, 800, 600]  # Przykładowe współrzędne
+    """
     root = Tk()
     root.attributes("-topmost", True)  # Nakładka nad innymi oknami
     try:
@@ -88,8 +106,35 @@ def select_area():
     root.mainloop()
     return area
 
-def monitor_and_capture(area, folder,threshold=2.0):
-    """Monitoruje zmiany w wybranym obszarze i zapisuje obraz, jeśli różnice przekraczają próg."""
+def monitor_and_capture(area, folder, threshold=2.0):
+    """
+    Monitoruje zmiany w wybranym obszarze ekranu i zapisuje zrzut ekranu, jeśli różnice przekraczają określony próg.
+
+    Funkcja stale wykonuje zrzuty ekranu zaznaczonego obszaru i porównuje je z poprzednimi.
+    Jeśli różnice między kolejnymi obrazami przekraczają ustalony procent `threshold`, zapisuje nowy zrzut ekranu w formacie JPG.
+
+    Args:
+        area (list): Lista czterech wartości [x, y, width, height], określająca zaznaczony obszar ekranu.
+            - x (int): Współrzędna X górnego lewego rogu zaznaczonego obszaru.
+            - y (int): Współrzędna Y górnego lewego rogu zaznaczonego obszaru.
+            - width (int): Szerokość zaznaczonego obszaru.
+            - height (int): Wysokość zaznaczonego obszaru.
+        folder (str): Ścieżka do katalogu, w którym zapisywane będą zrzuty ekranu.
+        threshold (float, optional): Procentowa wartość określająca, jak duża zmiana w obrazie powoduje zapis nowego zrzutu ekranu.
+            Wartość domyślna to 2.0%.
+
+    Raises:
+        KeyboardInterrupt: Zatrzymuje pętlę monitorowania w przypadku przerwania programu.
+
+    Example:
+        >>> monitor_and_capture([100, 150, 800, 600], "./screenshots", threshold=3.5)
+
+    Notes:
+        - Funkcja działa w pętli nieskończonej, dopóki `recording_active` nie zostanie ustawiona na `False`.
+        - Domyślnie zapisuje obrazy jako pliki JPG o jakości 85.
+        - Próg detekcji zmian (`threshold`) można dostosować dla lepszej czułości.
+    """
+
     global recording_active
     recording_active = True
     x, y, width, height = area
