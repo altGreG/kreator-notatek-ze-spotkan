@@ -20,6 +20,11 @@ source venv/bin/activate
 #### Dodanie klucza API do OPENAI
 Aby dodać klucz api wykonaj komendę:
 ```bash
+export EMAIL_PASSWORD="twoje_hasło_aplikaci_google"
+```
+#### Dodanie hasła do serwera pocztowego
+Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:
+```bash
 export OPENAI_API_KEY="twój_klucz_api"
 ```
 

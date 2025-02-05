@@ -93,7 +93,7 @@ def summarize_transcription(file_path: str) -> dict:
 
         # **🔹 Logowanie pełnej odpowiedzi API**
         response_content = response.choices[0].message.content.strip()
-        log.info(f"Treść odpowiedzi OpenAI: {response_content}")
+        #log.info(f"Treść odpowiedzi OpenAI: {response_content}")
 
         # **🔹 Usunięcie znaczników ```json i ```**
         if response_content.startswith("```json"):
