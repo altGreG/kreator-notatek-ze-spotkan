@@ -1,3 +1,29 @@
+"""Moduł transkrypcji audio z wykorzystaniem Google Cloud Speech-to-Text
+
+Skrypt umożliwia transkrypcję plików audio przy użyciu usługi Google Cloud Speech-to-Text. Użytkownik musi posiadać odpowiedni
+plik autoryzacyjny w formacie JSON, aby połączyć się z API Google Cloud. Funkcja `transcribe_with_gcloud` obsługuje proces
+autoryzacji, przesyłania pliku audio oraz odbierania transkrypcji, zapewniając logowanie oraz aktualizację statusu w aplikacji GUI.
+
+Wymagane zależności
+
+Aby uruchomić skrypt, należy zainstalować następujące pakiety w środowisku Python:
+
+    - google-cloud-speech: Klient do korzystania z API Google Cloud Speech-to-Text
+    - google-auth: Obsługa autoryzacji do usług Google Cloud
+    - loguru: Rozbudowany system logowania
+
+Do prawidłowego działania aplikacji należy zaimportować:
+
+    - log_status z modułu app.utilities.logger, służącą do logowania komunikatów statusowych.
+
+Skrypt może być używany jako moduł i zawiera następującą funkcję:
+
+    * transcribe_with_gcloud - Wykonuje transkrypcję pliku audio przy pomocy API Google Cloud Speech-to-Text.
+      Obsługuje autoryzację, wczytywanie pliku audio oraz transkrypcję tekstu z dźwięku w formacie MP3.
+
+Każda funkcja zawiera odpowiednie mechanizmy obsługi błędów, logowania oraz komunikatów dla użytkownika.
+"""
+
 from loguru import logger as log
 from app.utilities.logger import log_status
 from google.oauth2 import service_account

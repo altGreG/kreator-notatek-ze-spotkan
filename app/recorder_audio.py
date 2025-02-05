@@ -1,3 +1,29 @@
+# app/recorder_audio.py
+
+"""Moduł nagrywania dźwięku
+
+Skrypt umożliwia nagrywanie dźwięku z wybranego urządzenia audio, podział nagrania na fragmenty oraz zapis plików audio w formacie MP3.
+
+Wymagane zależności
+
+Aby uruchomić skrypt, należy zainstalować następujące pakiety w środowisku Python:
+
+    - pydub: Biblioteka do manipulacji plikami audio
+    - loguru: Rozbudowany system logowania
+
+Do prawidłowego działania aplikacji należy zaimportować:
+
+    - log_status z modułu app.utilities.logger, służącą do logowania komunikatów statusowych.
+
+Skrypt może być używany jako moduł i zawiera następujące funkcje:
+
+    * start_recording — rozpoczyna proces nagrywania dźwięku z wybranego urządzenia.
+    * stop_recording — zatrzymuje nagrywanie audio
+    * _save_audio_fragments — zapisuje fragmenty audio o określonej długości podczas aktywnego nagrywania.
+
+Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, logowania oraz komunikatów dla użytkownika.
+"""
+
 import platform
 import subprocess
 import os

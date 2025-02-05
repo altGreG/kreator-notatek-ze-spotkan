@@ -1,4 +1,4 @@
-from app.saving import save_text_to_txt
+from app.utilities.saving import save_text_to_txt
 from loguru import logger as log
 
 log.info("Test funkcji służącej do zapisu text w pliku txt o nazwie podanej w argumencie filename funkcji.")

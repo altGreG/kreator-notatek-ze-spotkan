@@ -1,3 +1,32 @@
+# app/mail_sender.py
+
+"""Moduł wysyłania e-maili z załącznikami
+
+Skrypt umożliwia wysyłanie wiadomości e-mail z załączonym plikiem na podany adres e-mail.
+Wysyłanie wiadomości odbywa się za pomocą serwera SMTP (np. Gmail). Skrypt obsługuje autentykację użytkownika oraz
+dodaje załącznik w postaci pliku, który jest kodowany w formacie Base64 przed wysłaniem.
+
+Wymagane zależności
+
+Aby uruchomić skrypt, należy zainstalować następujące pakiety w środowisku Python:
+
+    - smtplib: Biblioteka do obsługi protokołu SMTP
+    - email: Moduł do tworzenia i obsługi wiadomości e-mail
+    - dotenv: Moduł do ładowania zmiennych środowiskowych z pliku .env
+    - loguru: Rozbudowany system logowania
+
+Do prawidłowego działania aplikacji należy zaimportować:
+
+    - send_email z modułu app.email_sender, która wysyła e-mail z załącznikiem.
+
+Skrypt może być używany jako moduł i zawiera następującą funkcję:
+
+    * send_email - Wysyła wiadomość e-mail z plikiem załączonym do wiadomości na podany adres e-mail.
+      Funkcja obsługuje błędy związane z połączeniem, autentykacją oraz brakiem pliku.
+
+Każda funkcja zawiera mechanizmy logowania błędów oraz sukcesów operacji.
+"""
+
 import smtplib
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart

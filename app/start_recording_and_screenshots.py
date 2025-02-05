@@ -1,6 +1,34 @@
+#app/start_recording_and_screenshots.py
+
+"""Moduł zarządzania sesjami nagrań, zrzutów ekranu i transkrypcji
+
+Skrypt umożliwia jednoczesne nagrywanie dźwięku, wykonywanie zrzutów ekranu oraz transkrypcję nagranego materiału audio, zapewniając pełne zarządzanie tymi procesami.
+
+Wymagane zależności
+
+Aby skrypt działał poprawnie, wymagane jest zainstalowanie następujących pakietów:
+
+    - threading: Wbudowany moduł umożliwiający równoległe wykonywanie operacji.
+    - loguru: Biblioteka do zaawansowanego logowania.
+
+Skrypt współpracuje z następującymi modułami:
+
+    - app.recorder_audio: Nagrywanie dźwięku
+    - app.screenshots: Wybór obszaru ekranu oraz wykonywanie zrzutów
+    - app.transcriptor: Transkrypcja nagrań audio
+    - app.utilities.recording_utils: Zarządzanie katalogami dla danych sesji
+
+Skrypt może być używany jako moduł i zawiera następujące funkcje:
+
+    * start_recording_and_screenshots — uruchamia równoczesne nagrywanie dźwięku, wykonywanie zrzutów ekranu oraz transkrypcję audio w osobnych wątkach.
+    * stop_recording_and_screenshots — zatrzymuje nagrywanie dźwięku, wykonywanie zrzutów ekranu
+
+Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, aktualizację statusu użytkownika oraz integrację z systemami logowania.
+
+Dzięki modułowi użytkownik ma możliwość kompleksowego zarządzania sesjami, obejmującymi rejestrację dźwięku, wizualne zrzuty ekranu i przetwarzanie materiału audio na tekst.
+"""
+
 import threading
-
-
 from recorder_audio import start_recording, stop_recording
 from screenshots import select_area, monitor_and_capture, create_output_folder, stop_monitor_and_capture
 from app.transcriptor import transcribe_audio_from_folder
