@@ -29,6 +29,7 @@ Dzięki modułowi użytkownik ma możliwość kompleksowego zarządzania sesjami
 """
 
 import threading
+import tkinter
 from recorder_audio import start_recording, stop_recording
 from screenshots import select_area, monitor_and_capture, create_output_folder, stop_monitor_and_capture
 from app.transcriptor import transcribe_audio_from_folder
@@ -41,22 +42,25 @@ recording_active = False
 screenshot_thread = None
 transcriptor_thread = None
 
-def start_recording_and_screenshots(update_status, selected_audio_device, app, transription_false_update):
+def start_recording_and_screenshots(update_status: Callable[[str], None], selected_audio_device: str, app: tkinter.Tk, transription_false_update: Callable[[None], None]) -> None:
     """
     Funkcja uruchamiająca jednocześnie nagrywanie dźwięku i zrzuty ekranu.
 
     Args:
-        update_status: Funkcja do aktualizacji statusu w GUI.
-        selected_audio_device: Nazwa wybranego urządzenia audio.
-        app: Główna instancja Tkinter.
-        transription_false_update: metoda gui, odblokowuje przycisk play
+        update_status:
+            Funkcja do aktualizacji statusu w GUI.
+        selected_audio_device:
+            Nazwa wybranego urządzenia audio.
+        app:
+            Główna instancja Tkinter.
+        transription_false_update:
+            Funkcja GUI odblokowująca przycisk "play" po zakończeniu transkrypcji.
     """
     global recording_active, screenshot_thread, transcriptor_thread
     capture_area=None
 
     # Tworzenie folderu na zrzuty ekranu
     output_folders = create_output_folder()
-    print(output_folders)
 
     # Flaga aktywności
     recording_active = True
@@ -73,12 +77,7 @@ def start_recording_and_screenshots(update_status, selected_audio_device, app, t
 
     def run_transcription():
         global recording_active
-        transcribe_status = transcribe_audio_from_folder(output_folders[1], update_status, app, transription_false_update)
-
-        if transcribe_status is not None:
-            log.info("Nie udało się przeprowadzić transkrypcji audio.")
-        else:
-            log.info("Sukces. Dokonano pełnej transkrypcji audio.")
+        transcribe_audio_from_folder(output_folders[1], update_status, app, transription_false_update)
 
     # Uruchomienie nagrywania dźwięku w osobnym wątku
     audio_thread = threading.Thread(target=start_recording, args=(update_status, selected_audio_device, output_folders[1]))
@@ -102,11 +101,8 @@ def stop_recording_and_screenshots(update_status: Callable[[str], None]) -> None
         - Aktualizuje status w GUI.
 
     Args:
-        update_status (Callable[[str], None]):
+        update_status:
             Funkcja aktualizująca status w interfejsie użytkownika.
-
-    Returns:
-        None
 
     Notes:
         - Funkcja zapewnia, że zarówno audio, jak i zrzuty ekranu są zatrzymane w odpowiedni sposób.
@@ -125,4 +121,4 @@ def stop_recording_and_screenshots(update_status: Callable[[str], None]) -> None
         stop_monitor_and_capture()
         screenshot_thread.join()
 
-    update_status("Nagrywanie i zrzuty ekranu zakończone.")
+    update_status("Nagrywanie audio i zrzuty ekranu zakończone.")

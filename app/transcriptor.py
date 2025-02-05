@@ -2,7 +2,7 @@
 
 """Moduł transkrypcji audio
 
-Skrypt umożliwia transkrypcję plików audio do formatu tekstowego oraz ekstrakcję ścieżki audio z plików wideo.
+Skrypt umożliwia transkrypcję plików audio do formatu tekstowego.
 
 Wymagane zależności
 
@@ -20,21 +20,20 @@ Do prawidłowego działania aplikacji należy zaimportować:
 
 Skrypt może być używany jako moduł i zawiera następujące funkcje:
 
-    * extract_audio_from_video -  ekstrakcja ścieżki audio z plików wideo przy użyciu narzędzia ffmpeg.
     * transcribe_with_whisper_offline -  transkrypcja plików audio lokalnie przy użyciu modelu Whisper.
     * transcribe_audio_from_folder - automatyczna transkrypcja wszystkich plików audio z wybranego folderu.
 
 Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, logowania oraz komunikatów dla użytkownika.
 """
 
-import platform
-import subprocess
 import os
 import glob
+import tkinter
 import whisper
 import torch
 import time
 import warnings
+from typing import Callable, Optional
 from loguru import logger as log
 from app.utilities.logger import log_status
 from app.utilities.saving import save_text_to_txt
@@ -42,17 +41,18 @@ from app.utilities.saving import save_text_to_txt
 extracting_process = -1
 warnings.filterwarnings("ignore", module="whisper")
 
-
-def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) -> tuple[str, str | None]:
+def transcribe_with_whisper_offline(audio_file_path: str, update_status: Callable[[str], None]) -> tuple[str, str | None]:
     """
-    Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAI
+    Transkrybuje plik audio offline z wykorzystaniem modelu Whisper od OpenAI.
 
     Args:
-        audio_file_path: ścieżka do pliku z audio
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
+        audio_file_path:
+            Ścieżka do pliku z audio.
+        update_status:
+            Funkcja aktualizująca wiadomości statusu w aplikacji GUI.
 
     Returns:
-        nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst | nazwa pliku i None w razie błędu
+        nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst | nazwa transkrybowanego pliku i None w razie błędu
     """
 
 
@@ -63,7 +63,6 @@ def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) ->
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if device == "cuda":
         torch.cuda.init()
-    # log.debug(f"Urządzenie na którym zostanie wykonana transkrypcja: {device}")
 
     # tiny, base, small, medium, large, turbo
     model = whisper.load_model("medium").to(device)
@@ -73,6 +72,7 @@ def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) ->
         log_status(f"Błąd w czasie wczytywania pliku audio. Sprawdź poprawność ścieżki do pliku.")
         log.error(f"Błąd: \n {err}")
         return filename, None
+
     log.debug(f"Transkrypcja pliku audio: {filename}.mp3")
     log_status("Transkrypcja audio w toku...", "info", update_status)
     try:
@@ -82,35 +82,39 @@ def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) ->
         else:
             result = model.transcribe(audio=audio, language="pl")
 
-        # Proste formatowanie tekstu
+        # Tekst z transkrypcji
         transcribed_text = result["text"]
-
-        log_status(f"Skutecznie dokonano transkrypcji audio: {filename}.mp3", "success", update_status)
-        # print("Przetranskrybowany tekst:\n", transcribed_text)
+        log.success(f"Skutecznie dokonano transkrypcji audio: {filename}.mp3")
     except Exception as err:
-        log_status(f"Wystąpił problem w czasie transkrypcji audio: {err}", "error", update_status)
+        log_status(f"Wystąpił problem w czasie transkrypcji!", "error", update_status)
+        log.error(f"Błąd: {err}", "error", update_status)
         return filename, None
 
     return filename, transcribed_text
 
-def transcribe_audio_from_folder(folder_path: str, update_status: any, app, transription_false_update) -> str:
+def transcribe_audio_from_folder(folder_path: str, update_status: Callable[[str], None], app: tkinter.Tk, transription_false_update: Callable[[None], None]) -> Optional[str]:
     """
-    Uruchamia transkrypcję przy pomocy modelu Whisper dla każdego pliku audio, wedlug daty
-    utworzenia z timestampa.
+    Uruchamia transkrypcję audio z wykorzystaniem modelu Whisper dla każdego pliku audio we wskazanym folderze.
 
     Funkcja szuka nowych plików do transkrypcji we wskazanym folderze. Robi to tak długo aż nie natrafi
     na plik o nazwie koniec.txt. Wtedy wykonuje jeszcze tylko transkrypcję audio, które jeszcze nie
-    wykonał a następnie kończy proces transkrypcji. A wynik zapisuje w pliku txt o nazwie jak folder.
+    wykonał, a następnie kończy proces transkrypcji.
 
     Args:
-        folder_path: ścieżka do folderu z plikami audio
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
-        app: Główna instancja Tkinter.
-        transription_false_update: metoda gui, odblokowuje przycisk play
+        folder_path:
+            Ścieżka do folderu z plikami audio.
+        update_status:
+            Funkcja aktualizująca wiadomości statusu w interfejsie GUI.
+        app:
+            Główna instancja Tkinter.
+        transription_false_update:
+            Funkcja GUI odblokowująca przycisk "play" po zakończeniu transkrypcji.
 
     Returns:
-        Zwraca None w przypdku błędu lub ścieżkę do pliku txt z transkrypcją
+        Optional[str]:
+            Ścieżka do pliku tekstowego z wynikami transkrypcji lub None w przypadku błędu.
     """
+
     count_of_transcribed = 0
     is_end = None
     transcribed_files = []
@@ -125,18 +129,12 @@ def transcribe_audio_from_folder(folder_path: str, update_status: any, app, tran
     log.debug("Rozpoczęto transkrypcję plików audio z folderu")
 
     while is_end is None:
-        # TODO(altGreG): Dodać sortowanie po dacie utworzenia lub timestampach
         filepaths = glob.glob(folder_path_pattern)
         is_end = glob.glob(end_path)
         if (is_end) == []:
             is_end = None
+
         filepaths.sort()
-
-        # print(f"Paths for audios to transcribe: ")
-        # for path in filepaths:
-        #     if path not in transcribed_files:
-        #         print(f" - {path}")
-
         for filepath in filepaths:
             if filepath not in transcribed_files:
                 filename, transcribed_text = transcribe_with_whisper_offline(filepath, update_status)
@@ -146,13 +144,12 @@ def transcribe_audio_from_folder(folder_path: str, update_status: any, app, tran
                 filename_and_path, ext = os.path.splitext(filepath)
                 filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
 
+                # zapis tranksrypcji do odpowiedniego pliku .txt
                 save_text_to_txt(filename, transcribed_text,update_status,transcription_folder)
                 log.debug(f"Liczba przetranskrybowanych plików: {count_of_transcribed}")
+                log_status(f"Czas nagrywania: {(count_of_transcribed*30)/60} min")
 
-            # else:
-                # log.warning("Already transcribed")
-
-        time.sleep(2.5)
+        time.sleep(0.1)
 
     log.info("Dokonano transkrypcji wszystkich plików audio.")
     app.after(0, lambda: transription_false_update())

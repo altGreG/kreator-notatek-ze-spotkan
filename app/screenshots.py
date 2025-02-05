@@ -30,13 +30,11 @@ from tkinter import Tk, Canvas, Button
 from PIL import ImageGrab, ImageChops
 from loguru import logger as log
 from datetime import datetime
-
 from app.utilities.recording_utils import create_output_folder
 
 recording_active = False
 
-
-def select_area():
+def select_area() -> list[int]:
     """
     Tworzy nakładkę na ekranie, pozwalając użytkownikowi zaznaczyć obszar do przechwytywania.
 
@@ -44,7 +42,8 @@ def select_area():
     prostokątnego obszaru za pomocą myszy. Po wybraniu obszaru, zwraca jego współrzędne i rozmiar.
 
     Returns:
-        list: Lista zawierająca cztery wartości [x, y, width, height], gdzie:
+        Lista zawierająca cztery wartości [x, y, width, height], gdzie
+
             - x (int): Współrzędna X górnego lewego rogu zaznaczonego obszaru.
             - y (int): Współrzędna Y górnego lewego rogu zaznaczonego obszaru.
             - width (int): Szerokość zaznaczonego obszaru.
@@ -91,7 +90,6 @@ def select_area():
         root.destroy()
 
     def close_overlay():
-        """Funkcja zamykająca nakładkę po kliknięciu X."""
         root.destroy()
 
     # Dodaj przycisk zamykający nakładkę
@@ -106,7 +104,7 @@ def select_area():
     root.mainloop()
     return area
 
-def monitor_and_capture(area, folder, threshold=2.0):
+def monitor_and_capture(area: list[int], folder: str, threshold:float = 2.0):
     """
     Monitoruje zmiany w wybranym obszarze ekranu i zapisuje zrzut ekranu, jeśli różnice przekraczają określony próg.
 
@@ -114,13 +112,17 @@ def monitor_and_capture(area, folder, threshold=2.0):
     Jeśli różnice między kolejnymi obrazami przekraczają ustalony procent `threshold`, zapisuje nowy zrzut ekranu w formacie JPG.
 
     Args:
-        area (list): Lista czterech wartości [x, y, width, height], określająca zaznaczony obszar ekranu.
+        area:
+            Lista czterech wartości [x, y, width, height], określająca zaznaczony obszar ekranu.
+
             - x (int): Współrzędna X górnego lewego rogu zaznaczonego obszaru.
             - y (int): Współrzędna Y górnego lewego rogu zaznaczonego obszaru.
             - width (int): Szerokość zaznaczonego obszaru.
             - height (int): Wysokość zaznaczonego obszaru.
-        folder (str): Ścieżka do katalogu, w którym zapisywane będą zrzuty ekranu.
-        threshold (float, optional): Procentowa wartość określająca, jak duża zmiana w obrazie powoduje zapis nowego zrzutu ekranu.
+        folder:
+            Ścieżka do katalogu, w którym zapisywane będą zrzuty ekranu.
+        threshold:
+            Procentowa wartość określająca, jak duża zmiana w obrazie powoduje zapis nowego zrzutu ekranu.
             Wartość domyślna to 2.0%.
 
     Raises:
@@ -172,7 +174,10 @@ def monitor_and_capture(area, folder, threshold=2.0):
     except KeyboardInterrupt:
         print("Monitoring zakończony.")
 
-def stop_monitor_and_capture():
+def stop_monitor_and_capture() -> None:
+    """
+        Funkcja kończy działanie wątku od screenshotowania
+    """
     global recording_active
     recording_active = False
     log.debug(f"Screenshotowanie zakończone. Screenshoty zostały zapisane")

@@ -28,6 +28,7 @@ import platform
 import subprocess
 import os
 import threading
+from typing import Callable
 from datetime import datetime
 from pydub import AudioSegment
 from io import BytesIO
@@ -40,13 +41,17 @@ recording_active = True
 recording_directory = None
 
 
-def start_recording(update_status: any, selected_audio_device: str, recording_folder: str) -> None:
+def start_recording(update_status: Callable[[str], None], selected_audio_device: str, recording_folder: str) -> None:
     """
     Funkcja rozpoczynająca nagrywanie dźwięku z wybranego urządzenia.
 
     Args:
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
-        selected_audio_device: zmienna zawierająca nazwę urządzenia audio nagrywającego dźwięk
+        update_status:
+            Funkcja aktualizująca wiadomości statusu w aplikacji GUI.
+        selected_audio_device:
+            Zmienna zawierająca nazwę urządzenia audio nagrywającego dźwięk
+        recording_folder:
+            Zmienna zawierająca ścieżkę do folderu w którym będzie zapisywane audio
     """
     global recording_process, recording_active, recording_directory
 
@@ -95,16 +100,13 @@ def start_recording(update_status: any, selected_audio_device: str, recording_fo
 
 def _save_audio_fragments() -> None:
     """
-    Zapisuje fragmenty audio co 10 sekund bez zatrzymywania nagrywania.
+    Zapisuje fragmenty audio co 20 sekund bez zatrzymywania nagrywania.
 
     Działanie:
         - Odczytuje dane audio z procesu FFmpeg w czasie rzeczywistym.
         - Buforuje surowe dane audio.
-        - Po osiągnięciu 10-sekundowego fragmentu zapisuje go jako plik MP3.
+        - Po osiągnięciu 20-sekundowego fragmentu zapisuje go jako plik MP3.
         - Przechowuje nieprzetworzone dane w buforze, aby zachować ciągłość nagrywania.
-
-    Returns:
-        None
 
     Notes:
         - Fragmenty audio są zapisywane w katalogu `recording_directory` jako pliki MP3.
@@ -116,7 +118,7 @@ def _save_audio_fragments() -> None:
     global recording_process, recording_active, recording_directory
 
     buffer = BytesIO()
-    fragment_duration = 20 * 1000  # 10 sekund w milisekundach
+    fragment_duration = 20 * 1000  # 20 sekund w milisekundach
 
     try:
         while recording_active and recording_process.poll() is None:
@@ -146,7 +148,7 @@ def _save_audio_fragments() -> None:
         log.error(f"Błąd podczas zapisywania fragmentów audio: {e}")
 
 
-def stop_recording(update_status: any) -> None:
+def stop_recording(update_status: Callable[[str], None]) -> None:
     """
     Zatrzymuje proces nagrywania dźwięku i zapisuje informację o zakończeniu.
 
@@ -157,11 +159,8 @@ def stop_recording(update_status: any) -> None:
         - Aktualizuje status w GUI.
 
     Args:
-        update_status (Callable | None):
-            Funkcja służąca do aktualizacji statusu w interfejsie użytkownika.
-
-    Returns:
-        None
+        update_status:
+            Funkcja aktualizująca wiadomości statusu w aplikacji GUI.
 
     Notes:
         - Jeśli `recording_directory` jest ustawione, plik `koniec.txt` zostaje utworzony w folderze nagrania.
