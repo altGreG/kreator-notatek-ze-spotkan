@@ -12,3 +12,4 @@ pillow
 pydub
 reportlab
 python-dotenv
+markdown2
