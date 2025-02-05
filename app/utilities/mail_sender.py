@@ -76,9 +76,3 @@ def send_email(recipient_email, file_path):
         log.error(f"An error occurred: {e}")
         return f"Error: {e}"
 
-# Przykład użycia
-if __name__ == "__main__":
-    recipient = "sdworak@student.agh.edu.pl"
-    file_to_send = r"example.pdf"
-    result = send_email(recipient, file_to_send)
-    log.info(f"Result: {result}")
