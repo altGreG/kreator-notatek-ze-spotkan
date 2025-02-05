@@ -29,18 +29,21 @@ Każda funkcja zawiera mechanizmy obsługi błędów oraz odpowiednie komunikaty
 import os
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+from reportlab.platypus import SimpleDocTemplate, Spacer, Paragraph, Image
 from app.utilities.api.openai_api import summarize_transcription
 from textwrap import wrap
-
+import markdown2
+from reportlab.lib import colors
 
 def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder, full_transcription_path):
     """
     Generuje plik PDF na podstawie zrzutów ekranu (*.jpg) i transkrypcji (*.txt),
-    sortując pliki według timestampów w nazwach.
+    sortując pliki według timestampów w nazwach. Dodaje stronę tytułową z podsumowaniem AI.
 
     Args:
         output_pdf (str): Ścieżka do wyjściowego pliku PDF.
@@ -48,47 +51,45 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder, 
         transcripts_folder (str): Ścieżka do folderu zawierającego pliki transkrypcji.
         full_transcription_path (str): Ścieżka do pełnej transkrypcji dla podsumowania AI.
     """
+
     # Rejestracja czcionki obsługującej polskie znaki
-    styles_path = (os.getcwd().replace("\\", "/")).rsplit(r"/kreator-notatek-ze-spotkan")[0] + "/kreator-notatek-ze-spotkan/app/styles"
-    font_path = f"{styles_path}/DejaVuSans.ttf"  # Ścieżka do pliku czcionki
+    styles_path = os.path.join(os.getcwd(), "styles")
+    font_path = os.path.join(styles_path, "DejaVuSans.ttf")
     if not os.path.exists(font_path):
         raise FileNotFoundError(f"Nie znaleziono pliku czcionki: {font_path}")
 
     pdfmetrics.registerFont(TTFont("DejaVuSans", font_path))
 
-    # Pobierz podsumowanie AI
+    # Pobranie podsumowania AI i konwersja Markdown → HTML
     summary = summarize_transcription(full_transcription_path)
+    summary_html = markdown2.markdown(summary)
 
     # Tworzenie dokumentu PDF
-    c = canvas.Canvas(output_pdf, pagesize=A4)
-    width, height = A4
-    margin = 50  # Marginesy dla tekstu
+    doc = SimpleDocTemplate(output_pdf, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
 
-    ### 1️⃣ Strona tytułowa ###
-    c.setFont("DejaVuSans", 22)
-    c.drawCentredString(width / 2, height - 150, "📄 RAPORT ZE SPOTKANIA 📄")
+    # STRONA TYTUŁOWA
+    title_style = styles["Title"]
+    title_style.fontName = "DejaVuSans"
+    title_style.textColor = colors.black
+    title_style.alignment = 1  # Wyśrodkowanie
+    elements.append(Paragraph("📄 RAPORT ZE SPOTKANIA 📄", title_style))
+    elements.append(Spacer(1, 20))
 
-    c.setFont("DejaVuSans", 12)
+    # PODSUMOWANIE
+    body_style = styles["BodyText"]
+    body_style.fontName = "DejaVuSans"
+    body_style.leading = 14  # Odstępy między liniami
 
-    # Dostosowanie podsumowania - zawijanie tekstu
-    max_width = width - 2 * margin
-    wrapped_summary = wrap(summary, width=80)  # Dostosuj liczbę znaków w linii
+    summary_paragraph = Paragraph(summary_html, body_style)
+    elements.append(summary_paragraph)
+    elements.append(Spacer(1, 30))
 
-    # Ustawienie pozycji startowej dla tekstu podsumowania
-    y_position = height - 200
+    # Nowa strona po podsumowaniu
+    elements.append(Spacer(1, 50))
 
-    for line in wrapped_summary:
-        c.drawString(margin, y_position, line)
-        y_position -= 15  # Przesunięcie w dół
-
-        if y_position < 100:  # Jeśli zabraknie miejsca na stronie, nowa strona
-            c.showPage()
-            c.setFont("DejaVuSans", 12)
-            y_position = height - margin
-
-    c.showPage()  # Przejście do kolejnej strony po podsumowaniu
-
-    ### 2️⃣ Kolejne strony - zrzuty ekranu i transkrypcja ###
+    # LISTA PLIKÓW (SCREENSHOTY + TRANSKRYPCJE)
     screenshots = sorted([f for f in os.listdir(screenshots_folder) if f.endswith('.jpg')])
     transcripts = sorted([f for f in os.listdir(transcripts_folder) if f.endswith('.txt')])
 
@@ -101,25 +102,15 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder, 
     combined = sorted([(f, 'screenshot') for f in screenshots] + [(f, 'transcript') for f in transcripts],
                       key=lambda x: extract_timestamp(x[0]))
 
-    y_position = height - margin
-
+    # Dodanie obrazów i transkrypcji do PDF
     for filename, file_type in combined:
         if file_type == 'screenshot':
             file_path = os.path.join(screenshots_folder, filename)
             try:
-                img = ImageReader(file_path)
-                img_width, img_height = img.getSize()
-                aspect_ratio = img_width / img_height
-
-                display_width = width - 2 * margin
-                display_height = display_width / aspect_ratio
-
-                if y_position - display_height < margin:
-                    c.showPage()
-                    y_position = height - margin
-
-                c.drawImage(img, margin, y_position - display_height, display_width, display_height, preserveAspectRatio=True)
-                y_position -= (display_height + 20)
+                img = Image(file_path, width=400, height=300)  # Ustawienie szerokości i wysokości obrazu
+                elements.append(Spacer(1, 20))
+                elements.append(img)
+                elements.append(Spacer(1, 20))
             except Exception as e:
                 print(f"Błąd podczas dodawania obrazu {filename}: {e}")
 
@@ -129,40 +120,13 @@ def generate_pdf_from_files(output_pdf, screenshots_folder, transcripts_folder, 
                 with open(file_path, 'r', encoding='utf-8') as f:
                     text = f.read()
 
-                c.setFont("DejaVuSans", 10)
-                lines = text.splitlines()
-
-                for line in lines:
-                    words = line.split()
-                    line_buffer = ""
-
-                    for word in words:
-                        if c.stringWidth(line_buffer + word + " ", "DejaVuSans", 10) < (width - 2 * margin):
-                            line_buffer += word + " "
-                        else:
-                            c.drawString(margin, y_position, line_buffer.strip())
-                            y_position -= 15
-
-                            if y_position < margin:
-                                c.showPage()
-                                y_position = height - margin
-
-                            line_buffer = word + " "
-
-                    if line_buffer:
-                        c.drawString(margin, y_position, line_buffer.strip())
-                        y_position -= 15
-
-                        if y_position < margin:
-                            c.showPage()
-                            y_position = height - margin
-
+                text_html = markdown2.markdown(text)
+                transcript_paragraph = Paragraph(text_html, body_style)
+                elements.append(transcript_paragraph)
+                elements.append(Spacer(1, 15))
             except Exception as e:
                 print(f"Błąd podczas dodawania tekstu {filename}: {e}")
 
-        if y_position < margin:
-            c.showPage()
-            y_position = height - margin
-
-    c.save()
+    # Zapisanie dokumentu PDF
+    doc.build(elements)
     print(f"Raport PDF został wygenerowany: {output_pdf}")
