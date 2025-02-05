@@ -1,33 +1,50 @@
 # app/window.py
 
-"""Aplikacj GUI, trzon programu.
+"""Aplikacja GUI, trzon programu.
 
-Główny skrypt w paczce, zawiera definicje i implementacje metod aplikacji GUI naszego programu.
+Główny skrypt aplikacji zawiera definicje i implementacje metod interfejsu użytkownika.
 
-Skrypt wymaga aby w środowisku Pythona w którym uruchamiasz ten skrypt zostały
+Skrypt wymaga, aby w środowisku Pythona, w którym uruchamiasz ten skrypt, były
 zainstalowane następujące zależności:
 
     - `tkinter`
     - `loguru`
+    - `PIL` (Pillow)`
+    - `subprocess`
 
 Do poprawnego działania skryptu należy zaimportować następujące funkcje:
 
-    - `start_recording`,`stop_recording` z modułu app.recorder
+    - `start_recording`,`stop_recording` z modułu `app.recorder`
+    - `start_recording_and_screenshots`, `stop_recording_and_screenshots` z modułu `app.start_recording_and_screenshots`
+    - `generate_pdf_from_files` z modułu `app.utilities.pdf_generator`
+    - `send_email` z modułu `app.utilities.mail_sender`
+    - `log_status` z modułu `app.utilities.logger`
 
 Ten plik zawiera następujące funkcje:
 
-    * update_status - aktualizuje wiadomość statusu w gui
-    * generate_notes - zaczyna proces generowania notatek
-    * open_file - pozwala na wczytanie pliku mp4
-    * show_settings - włącza widok okna ustawień w gui
-    * show_help - włącza widok okna z pomocą w gui
+    * transription_false_update - resetuje stan transkrypcji.
+    * update_status - aktualizuje wiadomość statusu w GUI.
+    * generate_notes - rozpoczyna proces generowania notatek.
+    * open_file - pozwala na wczytanie pliku MP4.
+    * show_settings - otwiera okno ustawień w GUI.
+    * save_settings - zapisuje ustawienia użytkownika.
+    * show_help - otwiera okno pomocy w GUI.
+    * animate_buttons - animuje przesuwanie przycisków do docelowych pozycji.
+    * move_step - wykonuje pojedynczy krok animacji przycisków.
+    * toggle_menu_buttons - rozwija i zwija menu przycisków.
+    * create_circle_button - tworzy okrągły przycisk z tekstem lub ikoną.
+    * create_main_menu - tworzy główny przycisk menu.
+    * get_audio_devices - pobiera listę dostępnych urządzeń audio.
+    * find_all_pdfs - wyszukuje wszystkie pliki PDF w katalogu spotkania.
+    * show_email_input_window - wyświetla okno do podania adresu e-mail.
+    * show_pdf_selection_window - wyświetla okno wyboru raportu PDF.
+    * show_transcription_window - wyświetla okno transkrypcji.
+    * start_recording_and_screenshots_with_disable - rozpoczyna nagrywanie i blokuje przycisk start.
+    * stop_recording_all - zatrzymuje nagrywanie i przetwarzanie zrzutów ekranu.
+    * generate_notes - obsługuje wybór spotkania i generuje raport PDF.
 """
-
-# TODO(altGreG): Zaktualizować docstrings
-
 import tkinter as tk
 from tkinter import messagebox, filedialog, ttk
-
 from app.start_recording_and_screenshots import start_recording_and_screenshots, stop_recording_and_screenshots
 from app.utilities.logger import log_status
 from app.utilities.mail_sender import send_email
@@ -36,21 +53,21 @@ from app.utilities.pdf_generator import generate_pdf_from_files
 from recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
-import os  # Do obsługi ścieżek plików
+import os
 import webbrowser
 import subprocess
 
-
-recording_active = False  # Globalna zmienna śledząca stan nagrywania
-transcription_active = False  # Globalna zmienna śledząca stan transkrypcji nagrania
-
-# Ścieżka do pliku czcionki Open Sans
+# Globalne zmienne
+recording_active = False  # Śledzenie stanu nagrywania
+transcription_active = False  # Śledzenie stanu transkrypcji nagrania
 font_path = r".\styles\OpenSans-ExtraBoldItalic.ttf"
-selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
+selected_audio_device = None  # Przechowywanie wybranego urządzenia audio
+
 if not os.path.exists(font_path):
     raise FileNotFoundError(f"Plik czcionki nie został znaleziony: {font_path}")
 
 def transription_false_update():
+    """Resetuje stan transkrypcji i aktualizuje status GUI."""
     global transcription_active
     transcription_active = False
 
@@ -61,8 +78,12 @@ def transription_false_update():
 def update_status(new_status):
     """
     Aktualizuje tekst widżetu statusu i wyśrodkowuje go.
+
+    Args:
+        new_status: Nowy tekst statusu do wyświetlenia.
     """
     def update_label():
+        """Aktualizuje widżet statusu w GUI, renderując nowy obraz z tekstem na środku."""
         font_size = 20
         font = ImageFont.truetype(font_path, font_size)
         text = f"Status: {new_status}"
@@ -112,7 +133,7 @@ selected_audio_device = None  # Globalna zmienna na wybrane urządzenie
 
 def show_settings():
     """
-    Wyświetla okno ustawień, w którym użytkownik może wybrać urządzenie audio.
+     Wyświetla okno ustawień, umożliwiające wybór urządzenia audio.
     """
     global selected_audio_device
 
@@ -146,6 +167,9 @@ def show_settings():
         ).pack(anchor="w", padx=20)
 
     def save_settings():
+        """Zapisuje ustawienia użytkownika, w tym wybrane urządzenie audio.
+
+        """
         nonlocal device_var
         global selected_audio_device
         if device_var.get() == "UNSELECTED":
@@ -216,6 +240,11 @@ def animate_buttons(buttons, target_positions, duration=200, step=10):
     ]
 
     def move_step(i=0):
+        """Wykonuje pojedynczy krok animacji przycisków w trakcie ich przesuwania.
+
+            Args:
+                i: Numer aktualnego kroku animacji.
+        """
         if i < step:
             for button, (dx, dy) in zip(buttons, dx_dy):
                 button.place(x=button.winfo_x() + dx, y=button.winfo_y() + dy)
@@ -229,6 +258,13 @@ def animate_buttons(buttons, target_positions, duration=200, step=10):
 
 # Funkcja do rozwijania i zwijania przycisków z animacją
 def toggle_menu_buttons(canvas, main_button, buttons):
+    """Rozwija i zwija przyciski menu w aplikacji.
+
+            Args:
+                canvas: Obiekt tkinter.Canvas, na którym rysowane są elementy.
+                main_button: Główny przycisk menu, który steruje rozwijaniem.
+                buttons: Lista przycisków, które będą rozwijane i zwijane.
+            """
     # Sprawdź, czy menu jest rozwinięte
     if not hasattr(toggle_menu_buttons, "menu_visible"):
         toggle_menu_buttons.menu_visible = False
@@ -251,6 +287,18 @@ def toggle_menu_buttons(canvas, main_button, buttons):
 
 # Funkcja do stworzenia przycisku okrągłego (z obrazem lub tekstem)
 def create_circle_button(parent, x, y, size, text, fill_color, outline_color, command):
+    """Tworzy okrągły przycisk z tekstem lub ikoną.
+
+            Args:
+                parent: Obiekt nadrzędny (okno lub ramka).
+                x: Pozycja X przycisku.
+                y: Pozycja Y przycisku.
+                size: Rozmiar przycisku.
+                text: Tekst lub ikona wyświetlana na przycisku.
+                fill_color: Kolor wypełnienia przycisku.
+                outline_color: Kolor obramowania przycisku.
+                command: Funkcja wywoływana po kliknięciu w przycisk.
+            """
     scale = 2
     high_res_size = size * scale
 
@@ -283,6 +331,12 @@ def create_circle_button(parent, x, y, size, text, fill_color, outline_color, co
 
 # Funkcja tworząca główny przycisk menu
 def create_main_menu(canvas, app):
+    """Tworzy główny przycisk menu oraz rozwijane przyciski dodatkowe.
+
+            Args:
+                canvas: Obiekt tkinter.Canvas, na którym rysowane są elementy.
+                app: Główne okno aplikacji.
+    """
     # Przyciski dodatkowe
     buttons = []
 
@@ -432,6 +486,9 @@ def find_all_pdfs():
 def show_email_input_window(selected_pdf_path):
     """
     Wyświetla okno do wprowadzenia adresu email do wysłania wybranego PDF.
+
+    Args:
+        selected_pdf_path: Ścieżka do wybranego pliku PDF.
     """
     email_window = tk.Toplevel(app)
     email_window.title("Wyślij raport PDF")
@@ -616,6 +673,8 @@ def generate_notes():
         ).pack(anchor="w", padx=10, pady=2)
 
     def save_meeting_selection():
+        """Zapisuje wybór spotkania i generuje raport PDF.
+            """
         if not selected_meeting.get():
             messagebox.showwarning("Brak wyboru", "Proszę wybrać spotkanie przed zatwierdzeniem.")
             return
@@ -669,6 +728,9 @@ notes_button.grid(row=0, column=3, padx=10)
 def get_audio_devices():
     """
     Pobiera listę dostępnych urządzeń audio za pomocą FFmpeg.
+
+    Returns:
+        Lista dostępnych urządzeń audio w systemie.
     """
     try:
         result = subprocess.run(
