@@ -10,4 +10,3 @@ plugins:
 nav:
   - Strona Główna: index.md
   - Konfiguracja: configuration.md
-  - Referencja: reference.md

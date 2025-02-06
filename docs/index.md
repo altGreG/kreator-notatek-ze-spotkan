@@ -50,3 +50,19 @@ project-folder/
 
 ::: app
 
+---
+
+## Implementacje funkcjonalności
+
+1. [Moduł window.py](modules/window.md)
+2. [Moduł transcriptor.py](modules/transcriptor.md)
+3. [Moduł screenshots.py](modules/screenshots.md)
+4. [Moduł recorder_audio.py](modules/recorder_audio.md)
+5. [Moduł start_recording_and_screenshots.py](modules/start_recording_and_screenshots.md)
+6. [Moduł saving.py](modules/utilities/saving.md)
+7. [Moduł recording_utils.py](modules/utilities/recording_utils.md)
+8. [Moduł pdf_generator.py](modules/utilities/pdf_generator.md)
+9. [Moduł mail_sender.py](modules/utilities/mail_sender.md)
+10. [Moduł logger.py](modules/utilities/logger.md)
+11. [Moduł openai_api.py](modules/utilities/api/openai_api.md)
+
