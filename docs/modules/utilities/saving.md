@@ -2,4 +2,4 @@
 ---
 ::: app.utilities.saving
 
-[<- Powrót do strony głównej](../..)
+[<- Powrót do strony głównej](../../..)

@@ -1,34 +1,3 @@
-# Linux
-
-#### Instalacja Pythona
-```bash
-sudo apt-get install python3 python3-pip
-sudo apt-get install python3-tk
-```
-#### Instalacja oprogramowania FFMPEG
-```bash
-sudo apt update && sudo apt install ffmpeg
-```
-#### Stworzenie wirtualnego środowiska
-```bash
-pip install virtualenv 
-python3 -m venv venv
-# wejdź do stworzonego środowiska
-source venv/bin/activate
-```
-
-#### Dodanie klucza API do OPENAI
-Aby dodać klucz api wykonaj komendę:
-```bash
-export EMAIL_PASSWORD="twoje_hasło_aplikaci_google"
-```
-#### Dodanie hasła do serwera pocztowego
-Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:
-```bash
-export OPENAI_API_KEY="twój_klucz_api"
-```
-
----
 # Windows
 #### Instalacja Pythona
 1. Ze strony python.org (https://www.python.org/downloads/windows/) pobierz najnowszą stabilną wersję Pythona.
@@ -61,6 +30,12 @@ Aby dodać klucz api wykonaj komendę:
 ```bash
 setx OPENAI_API_KEY "twój_klucz_api"
 ```
+
+#### Dodanie hasła do serwera pocztowego
+Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:
+```bash
+setx EMAIL_PASSWORD "twoje_hasło_aplikaci_google"
+```
 ---
 
 # Konfiguracja Pythona i uruchomienie programu (Windows i Linux)
@@ -86,3 +61,36 @@ python -m pip list
 ```
 1. Otwórz projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie stworzonego przez nas środowiska.
 2. Uruchom program, aby to zrobić należy uruchomić główny skrypt, którym jest `window.py`.
+
+---
+
+# Linux
+
+#### Instalacja Pythona
+```bash
+sudo apt-get install python3 python3-pip
+sudo apt-get install python3-tk
+```
+#### Instalacja oprogramowania FFMPEG
+```bash
+sudo apt update && sudo apt install ffmpeg
+```
+#### Stworzenie wirtualnego środowiska
+```bash
+pip install virtualenv 
+python3 -m venv venv
+# wejdź do stworzonego środowiska
+source venv/bin/activate
+```
+
+#### Dodanie klucza API do OPENAI
+Aby dodać klucz api wykonaj komendę:
+```bash
+export OPENAI_API_KEY="twój_klucz_api"
+```
+
+#### Dodanie hasła do serwera pocztowego
+Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:
+```bash
+export EMAIL_PASSWORD="twoje_hasło_aplikaci_google"
+```

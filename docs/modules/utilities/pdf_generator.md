@@ -2,4 +2,4 @@
 ---
 ::: app.utilities.pdf_generator
 
-[<- Powrót do strony głównej](../..)
+[<- Powrót do strony głównej](../../..)

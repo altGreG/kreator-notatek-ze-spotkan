@@ -2,4 +2,4 @@
 ---
 ::: app.utilities.logger
 
-[<- Powrót do strony głównej](../..)
+[<- Powrót do strony głównej](../../..)
