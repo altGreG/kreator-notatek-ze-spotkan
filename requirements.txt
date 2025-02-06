@@ -8,3 +8,8 @@ protobuf
 loguru
 mkdocs
 mkdocs-material
+pillow
+pydub
+reportlab
+python-dotenv
+markdown2

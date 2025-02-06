@@ -1,235 +1,156 @@
 # app/transcriptor.py
 
-"""Narzędzia transkrypcji audio
+"""Moduł transkrypcji audio
 
-Ten skrypt pozwala użytkownikowi na transkrypcję plików audio do plików tekstowych.
+Skrypt umożliwia transkrypcję plików audio do formatu tekstowego.
 
-Skrypt wymaga aby w środowisku Pythona w którym uruchamiasz ten skrypt zostały
-zainstalowane następujące zależności:
+Wymagane zależności
 
-    - `openai-whisper`
-    - `torch`
-    - `torchvision`
-    - `torchaudio`
-    - `google-cloud-speech`
-    - `protobuf`
-    - `loguru`
-    - setuptools-rust
+Aby uruchomić skrypt, należy zainstalować następujące pakiety w środowisku Python:
 
-Do poprawnego działania skryptu należy zaimportować następujące funkcje:
+    - openai-whisper: Model do transkrypcji mowy
+    - torch, torchvision, torchaudio: Narzędzia do przetwarzania danych audio
+    - loguru: Rozbudowany system logowania
+    - setuptools-rust: Wsparcie dla rozszerzeń w Rust
 
-    - `log_status` z modułu app.loger
+Do prawidłowego działania aplikacji należy zaimportować:
 
-Ten plik może zostać zaimportowany również jako moduł i zawiera następujące funkcje:
+    - log_status z modułu app.utilities.loger, służącą do logowania komunikatów statusowych.
+    - save_text_to_txt z modułu app.utilities.saving
 
-    * extract_audio_from_video - ekstrakcja audio z video
-    * transcribe_with_whisper_offline - transkrypcja audio z modelem Whisper na maszynie użytkownika
-    * transcribe_with_gcloud - transkrypcja audio w chmurze Google Cloud i usługu Speech To Text
-    * text_formatting - formatowanie tekstu, by linijka zawierała maksymalnie 30 słów
+Skrypt może być używany jako moduł i zawiera następujące funkcje:
+
+    * transcribe_with_whisper_offline -  transkrypcja plików audio lokalnie przy użyciu modelu Whisper.
+    * transcribe_audio_from_folder - automatyczna transkrypcja wszystkich plików audio z wybranego folderu.
+
+Każda funkcja posiada odpowiednie mechanizmy obsługi błędów, logowania oraz komunikatów dla użytkownika.
 """
 
-
-import platform
-import subprocess
 import os
+import glob
+import tkinter
 import whisper
 import torch
-import io
-from google.oauth2 import service_account
-from google.cloud import speech
+import time
+import warnings
+from typing import Callable, Optional
 from loguru import logger as log
-from app.logger import log_status
+from app.utilities.logger import log_status
+from app.utilities.saving import save_text_to_txt
 
 extracting_process = -1
+warnings.filterwarnings("ignore", module="whisper")
 
-def extract_audio_from_video(video_file_path: str, update_status: any) -> str | None:
+def transcribe_with_whisper_offline(audio_file_path: str, update_status: Callable[[str], None]) -> tuple[str, str | None]:
     """
-    Ekstrakcja audio z wideo z wykorzystaniem `ffmpeg`
+    Transkrybuje plik audio offline z wykorzystaniem modelu Whisper od OpenAI.
 
     Args:
-        video_file_path: ścieżka do pliku z video
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
+        audio_file_path:
+            Ścieżka do pliku z audio.
+        update_status:
+            Funkcja aktualizująca wiadomości statusu w aplikacji GUI.
 
     Returns:
-        ścieżka do pliku audio | None w razie błędu
-    """
-    global extracting_process
-
-    system_name = platform.system()
-    filename = ((video_file_path.replace("\\", "/")).split("/")[-1]).split(".")[0]
-    output_dir = (video_file_path.replace("\\", "/")).rsplit("/", 1)[0] + "/audio"
-    os.makedirs(output_dir, exist_ok=True)  # Tworzenie folderu, jeśli nie istnieje
-    filename_and_path = output_dir + "/" + filename
-    audio_ext = "mp3"
-
-    log_status("Ekstrakcja audio w toku...", "info", update_status)
-    log.debug(f"Scieżka do pliku video: {video_file_path}. System: {system_name}")
-    if system_name == "Windows":
-        try:
-            # TODO(altGreG): Po testach, usunąć opcję -t z komendy (-t mówi jak długi kawałek nagrania przekonwertować)
-            extracting_process = subprocess.call(["ffmpeg", "-y", "-i", video_file_path, "-t", "00:00:50.0", f"{filename_and_path}.{audio_ext}"],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.STDOUT)
-        except Exception as err:
-            log_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}", "error", update_status)
-            return None
-    elif system_name == "Linux":
-        try:
-            extracting_process = subprocess.call(["ffmpeg", "-y", "-i", video_file_path, f"{filename_and_path}.{audio_ext}"],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.STDOUT)
-        except Exception as err:
-            log_status(f"Wystąpił problem w czasie ekstrakcji audio z video: {err}", "error", update_status)
-            return None
-
-    if extracting_process != 0:
-        log_status(f"Błąd w czasie ekstrakcji audio z wideo (ffmpeg).\nKod błędu: {extracting_process}", "error", update_status)
-        return None
-    else:
-        log_status("Sukces. Dokonano ekstrakcji audio z wideo.", "success", update_status)
-        log.debug(f"Ścieżka do pliku audio: {filename_and_path}.{audio_ext}")
-        return f"{filename_and_path}.{audio_ext}"
-
-def transcribe_with_whisper_offline(audio_file_path: str, update_status: any) -> tuple[str, str | None]:
-    """
-    Transkrypcja audio offline z wykorzystaniem modelu Whisper od OpenAI
-
-    Args:
-        audio_file_path: ścieżka do pliku z audio
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
-
-    Returns:
-        nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst | nazwa pliku i None w razie błędu
+        nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst | nazwa transkrybowanego pliku i None w razie błędu
     """
 
 
-    log_status("Przygotowanie do transkrypcji audio.", "info", update_status)
     filename_and_path, ext = os.path.splitext(audio_file_path)
     filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
     audio_file_path = audio_file_path.replace("\\", "/")
-    log.debug(f"Filename: {filename}  |  Ext: {ext}")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if device == "cuda":
         torch.cuda.init()
-    log_status(f"Urządzenie na którym zostanie wykonana transkrypcja: {device}", "info", update_status)
 
     # tiny, base, small, medium, large, turbo
     model = whisper.load_model("medium").to(device)
     try:
         audio = whisper.load_audio(audio_file_path)
-        log.debug("Wczytano plik audio do modelu.")
     except Exception as err:
         log_status(f"Błąd w czasie wczytywania pliku audio. Sprawdź poprawność ścieżki do pliku.")
         log.error(f"Błąd: \n {err}")
         return filename, None
 
+    log.debug(f"Transkrypcja pliku audio: {filename}.mp3")
     log_status("Transkrypcja audio w toku...", "info", update_status)
     try:
-        with torch.cuda.device(device):
-            result = model.transcribe(audio=audio, language="pl", word_timestamps=True)
-
-        # Proste formatowanie tekstu
-        transcribed_text = text_formatting(result["text"])
-
-        log_status("Skutecznie dokonano transkrypcji audio.", "success", update_status)
-        print("Przetranskrybowany tekst:\n", transcribed_text)
-    except Exception as err:
-        log_status(f"Wystąpił problem w czasie transkrypcji audio: {err}", "error", update_status)
-        return filename, None
-
-    return filename, transcribed_text
-
-# TODO(altGreG): Na razie program może obsłużyć pliki audio o długości do 1 minuty, do poprawy
-def transcribe_with_gcloud(audio_file_path: str, update_status: any) -> tuple[str, str | None]:
-    """
-    Transkrypcja audio z wykorzystaniem API do usługi Speech to Text na Google Cloud
-
-    Args:
-        audio_file_path: ścieżka do pliku z audio
-        update_status: metoda aplikacji gui (aktualizacja wiadomości statusu)
-
-    Returns:
-        nazwa pliku audio, którego dotyczy transkrypcja i przetranskrybowany tekst | nazwa pliku i None w razie błędu
-    """
-
-
-    log_status("Przygotowanie do transkrypcji audio.", "info", update_status)
-
-    filename_and_path, ext = os.path.splitext(audio_file_path)
-    filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
-    audio_file_path = audio_file_path.replace("\\", "/")
-
-    log.debug(f"Filename: {filename}  |  Ext: {ext}")
-
-    """
-    Utworzenie obiektu do autoryzacji dostępu do usług Google Cloud
-    Uwaga: Użytkownik sam musi pozyskać plik JSON do autoryzacji w Google Cloud API
-    """
-    try:
-        client_file = '../sa_gc.json'
-        credentials = service_account.Credentials.from_service_account_file(client_file)
-        client = speech.SpeechClient(credentials=credentials)
-        log_status("Załadowanie pliku autoryzacyjnego do usług Google Cloud, konfiguracja.", "info", update_status)
-    except Exception as err:
-        log_status("Brak pliku autoryzacyjnego do usług Google Cloud, brak dostępu.", "error", update_status)
-        log.error(f"Błąd: {err}")
-        return filename, None
-
-    try:
-        with io.open(audio_file_path, mode="rb") as audio_file:
-            content = audio_file.read()
-            audio = speech.RecognitionAudio(content=content)
-        log.debug("Wczytano plik audio.")
-    except Exception as err:
-        log_status(f"Błąd w czasie wczytywania pliku audio.", "error", update_status)
-        log.error(f"Błąd: {err}")
-        return filename, None
-
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.MP3,
-        sample_rate_hertz=44100,
-        language_code="pl-pl",
-        enable_automatic_punctuation=True,
-    )
-
-    log_status("Transkrypcja audio w toku...", "info", update_status)
-    try:
-        response = client.recognize(config=config, audio=audio)
-
-        transcribed_text_before_formatting = ""
-        for result in response.results:
-            transcribed_text_before_formatting = result.alternatives[0].transcript
-
-        # Proste formatowanie tekstu
-        transcribed_text = text_formatting(transcribed_text_before_formatting)
-
-        log_status("Sukces. Dokonano transkrypcji audio.", "success", update_status)
-        print("Przetranskrybowany tekst:\n", transcribed_text)
-    except Exception as err:
-        log_status(f"Wystąpił problem w czasie transkrypcji audio: {err}", "error", update_status)
-        return filename, None
-
-    return filename, transcribed_text
-
-def text_formatting(text: str) -> str:
-    """
-    Formatowanie tekstu
-
-    Transformacja tekstu w taki sposób, by każda linijka tekstu zajmowała maksymalnie 30 słów.
-
-    Args:
-        text: tekst do sformatowania
-
-    Returns:
-        sformatowany tekst
-    """
-    i = 1
-    result = ""
-    for word in text.split(" "):
-        i += 1
-        if i % 30 == 0:
-            result += f"{word}\n"
+        if device == "cuda":
+            with torch.cuda.device(device):
+                result = model.transcribe(audio=audio, language="pl")
         else:
-            result += f"{word} "
-    return result
+            result = model.transcribe(audio=audio, language="pl")
+
+        # Tekst z transkrypcji
+        transcribed_text = result["text"]
+        log.success(f"Skutecznie dokonano transkrypcji audio: {filename}.mp3")
+    except Exception as err:
+        log_status(f"Wystąpił problem w czasie transkrypcji!", "error", update_status)
+        log.error(f"Błąd: {err}", "error", update_status)
+        return filename, None
+
+    return filename, transcribed_text
+
+def transcribe_audio_from_folder(folder_path: str, update_status: Callable[[str], None], app: tkinter.Tk, transription_false_update: Callable[[None], None]) -> Optional[str]:
+    """
+    Uruchamia transkrypcję audio z wykorzystaniem modelu Whisper dla każdego pliku audio we wskazanym folderze.
+
+    Funkcja szuka nowych plików do transkrypcji we wskazanym folderze. Robi to tak długo aż nie natrafi
+    na plik o nazwie koniec.txt. Wtedy wykonuje jeszcze tylko transkrypcję audio, które jeszcze nie
+    wykonał, a następnie kończy proces transkrypcji.
+
+    Args:
+        folder_path:
+            Ścieżka do folderu z plikami audio.
+        update_status:
+            Funkcja aktualizująca wiadomości statusu w interfejsie GUI.
+        app:
+            Główna instancja Tkinter.
+        transription_false_update:
+            Funkcja GUI odblokowująca przycisk "play" po zakończeniu transkrypcji.
+
+    Returns:
+        Optional[str]:
+            Ścieżka do pliku tekstowego z wynikami transkrypcji lub None w przypadku błędu.
+    """
+
+    count_of_transcribed = 0
+    is_end = None
+    transcribed_files = []
+
+    folder_path_pattern = f"{folder_path}/*.mp3"
+    end_path = f"{folder_path}/koniec.txt"
+
+    base_path, timestamp = (folder_path.replace("\\", "/")).rsplit("/audio-", 1)
+    transcription_folder = base_path + "/" + f"txt-{timestamp}"
+    log.debug(f"Txt folder path: {transcription_folder}")
+
+    log.debug("Rozpoczęto transkrypcję plików audio z folderu")
+
+    while is_end is None:
+        filepaths = glob.glob(folder_path_pattern)
+        is_end = glob.glob(end_path)
+        if (is_end) == []:
+            is_end = None
+
+        filepaths.sort()
+        for filepath in filepaths:
+            if filepath not in transcribed_files:
+                filename, transcribed_text = transcribe_with_whisper_offline(filepath, update_status)
+                transcribed_files.append(filepath)
+                count_of_transcribed += 1
+
+                filename_and_path, ext = os.path.splitext(filepath)
+                filename = (filename_and_path.replace("\\", "/")).split("/")[-1]
+
+                # zapis tranksrypcji do odpowiedniego pliku .txt
+                save_text_to_txt(filename, transcribed_text,update_status,transcription_folder)
+                log.debug(f"Liczba przetranskrybowanych plików: {count_of_transcribed}")
+                log_status(f"Czas nagrywania: {(count_of_transcribed*30)/60} min", "info", update_status)
+
+        time.sleep(0.1)
+
+    log.info("Dokonano transkrypcji wszystkich plików audio.")
+    app.after(0, lambda: transription_false_update())
+

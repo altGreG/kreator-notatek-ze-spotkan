@@ -12,8 +12,6 @@
         <link rel="prev" href="..">
       
       
-        <link rel="next" href="../reference/">
-      
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
@@ -64,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#linux" class="md-skip">
+        <a href="#windows" class="md-skip">
           Skip to content
         </a>
       
@@ -182,6 +180,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -210,6 +210,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -218,18 +220,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#linux" class="md-nav__link">
+  <a href="#instalacja-pythona" class="md-nav__link">
     <span class="md-ellipsis">
-      Linux
+      Instalacja Pythona
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
+  <a href="#instalacja-oprogramowania-ffmpeg" class="md-nav__link">
     <span class="md-ellipsis">
-      Windows
+      Instalacja oprogramowania FFMPEG
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#konfiguracja-ustawien-audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Konfiguracja ustawień audio
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dodanie-klucza-api-do-openai" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dodanie klucza API do OPENAI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dodanie-hasa-do-serwera-pocztowego" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dodanie hasła do serwera pocztowego
     </span>
   </a>
   
@@ -239,26 +268,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Referencja
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -280,6 +289,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -288,18 +299,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#linux" class="md-nav__link">
+  <a href="#instalacja-pythona" class="md-nav__link">
     <span class="md-ellipsis">
-      Linux
+      Instalacja Pythona
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
+  <a href="#instalacja-oprogramowania-ffmpeg" class="md-nav__link">
     <span class="md-ellipsis">
-      Windows
+      Instalacja oprogramowania FFMPEG
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#konfiguracja-ustawien-audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Konfiguracja ustawień audio
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dodanie-klucza-api-do-openai" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dodanie klucza API do OPENAI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dodanie-hasa-do-serwera-pocztowego" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dodanie hasła do serwera pocztowego
     </span>
   </a>
   
@@ -320,67 +358,58 @@
                   
 
 
-  <h1>Konfiguracja</h1>
-
-<h3 id="linux">Linux</h3>
-<p>W terminalu wykonujemy następujące komendy.</p>
+<h1 id="windows">Windows</h1>
+<h4 id="instalacja-pythona">Instalacja Pythona</h4>
+<ol>
+<li>Ze strony python.org (https://www.python.org/downloads/windows/) pobierz najnowszą stabilną wersję Pythona.</li>
+<li>W czasie instalacji kliknij 'Customize Installation' i upewnij się że masz zaznaczone opcje 'pip' oraz 'tcl/tk and idle'. Reszta jest opcjonalna.</li>
+<li>Zainstaluj</li>
+</ol>
+<h4 id="instalacja-oprogramowania-ffmpeg">Instalacja oprogramowania FFMPEG</h4>
+<ol>
+<li>Ze strony https://www.gyan.dev/ffmpeg/builds/ pobierz odpowiednią wersję ffpmpeg. Zip z programem znajdziesz w zakładce 'release builds'.</li>
+<li>Rozpakuj program na swoim komputerze w wybranym miejscu, gdzie program zostanie już na stałe.</li>
+<li>Nastepnie, aby mieć dostęp do funkcjonalności programu z poziomu terminala, dodaj ścieżkę do folder z plikiem ffmpeg.exe w zmiennych środowiskowych do zmiennej 'PATH'.
+   Robimy to graficznie:</li>
+</ol>
+<p><img alt="EnvironmentVariables" src="../assets/EnvironmentVariableConfiguration.gif" /></p>
+<h4 id="konfiguracja-ustawien-audio">Konfiguracja ustawień audio</h4>
+<p>Włącz urządzenie audio o nazwie typu 'Mix Stereo', pozwoli ona na nagrywanie dżwięku na twoim komputerze.</p>
+<p><img alt="StereoMixConfiguration" src="../assets/StereoMixConfigurationCompressed.gif" /></p>
+<h4 id="dodanie-klucza-api-do-openai">Dodanie klucza API do OPENAI</h4>
+<p>Aby dodać klucz api wykonaj komendę:</p>
+<pre><code class="language-bash">setx OPENAI_API_KEY &quot;twój_klucz_api&quot;
+</code></pre>
+<h4 id="dodanie-hasa-do-serwera-pocztowego">Dodanie hasła do serwera pocztowego</h4>
+<p>Aby dodać hasło aplikacji dla skonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
+<pre><code class="language-bash">setx EMAIL_PASSWORD &quot;twoje_hasło_aplikaci_google&quot;
+</code></pre>
+<hr />
+<h1 id="konfiguracja-pythona-i-uruchomienie-programu-windows-i-linux">Konfiguracja Pythona i uruchomienie programu (Windows i Linux)</h1>
+<h3 id="1-uruchom-pycharma-i-skonfiguruj-srodowisko">1. Uruchom Pycharma i skonfiguruj środowisko</h3>
+<p>Otwórz projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie do pobrania bibliotek zawartość requirements.txt i skonfiguruje środowisko.</p>
+<h3 id="2-doinstaluj-w-konsoli-z-poziomu-pycharma-dodatkowe-zaleznosci">2. Doinstaluj w konsoli z poziomu Pycharma dodatkowe zależności</h3>
+<pre><code class="language-bash">pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 
+python -m pip install &quot;mkdocstrings[python]&quot;
+</code></pre>
+<h3 id="3-uruchom-program-aby-to-zrobic-nalezy-uruchomic-gowny-skrypt-ktorym-jest-windowpy">3. Uruchom program, aby to zrobić należy uruchomić główny skrypt, którym jest <code>window.py</code>.</h3>
+<hr />
+<h1 id="linux">Linux</h1>
+<h4 id="instalacja-pythona_1">Instalacja Pythona</h4>
 <pre><code class="language-bash">sudo apt-get install python3 python3-pip
 sudo apt-get install python3-tk
-sudo apt update &amp;&amp; sudo apt install ffmpeg
-pip install virtualenv 
-python3 -m venv venv
-source venv/bin/activate
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-python -m pip install &quot;mkdocstrings[python]&quot;
-
-pip install -r requirements.txt
-# or
-pip install -U openai-whisper
-pip install setuptools-rust
-pip install speechrecognition
-pip install openai
-pip install google-cloud-speech
-pip install protobuf
-pip install loguru
-python -m pip install mkdocs
-python -m pip install mkdocs-material
-
-python -m pip list
 </code></pre>
-<hr />
-<h3 id="windows">Windows</h3>
-<p>Ze strony python.org (https://www.python.org/downloads/windows/) pobieramy najnowszą stabilną wersję Pythona.
-W czasie instalacji klikamy Customize Installation i upewniamy się że mamy zaznaczone opcje pip oraz tcl/tk and idle reszta jest opcjonalna. Instalujemy.</p>
-<p>Ze strony https://www.gyan.dev/ffmpeg/builds/ pobieramy odpowiednią wrsję ffpmpeg. Zip z programem znajdziemy w zakładce release builds.
-Program rozpakowujemy na naszym komputerze w wybranym przez nas miejscu gdzie program zostanie już na stałe.</p>
-<p>Nastepnie aby mieć dostęp do funkcjonalności programu z poziomu terminala, dodajemy ścieżkę do folder z plikiem ffmpeg.exe w środku, robimy to graficznie lub za pomocą komendy</p>
-<pre><code class="language-bash">set PATH=%PATH%;C:\your\path\here;
+<h4 id="instalacja-oprogramowania-ffmpeg_1">Instalacja oprogramowania FFMPEG</h4>
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install ffmpeg
 </code></pre>
-<p>W powershellu wykonujemy następujące komendy.</p>
-<pre><code class="language-bash">pip install virtualenv 
-python -m venv env
-env\Scripts\activate
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-python -m pip install &quot;mkdocstrings[python]&quot;
-
-
-pip install -r requirements.txt
-# or
-pip install -U openai-whisper
-pip install setuptools-rust
-pip install speechrecognition
-pip install openai
-pip install google-cloud-speech
-pip install protobuf
-pip install loguru
-python -m pip install mkdocs
-python -m pip install mkdocs-material
-
-python -m pip list
+<h4 id="dodanie-klucza-api-do-openai_1">Dodanie klucza API do OPENAI</h4>
+<p>Aby dodać klucz api wykonaj komendę:</p>
+<pre><code class="language-bash">export OPENAI_API_KEY=&quot;twój_klucz_api&quot;
 </code></pre>
-<hr />
-<p>Następnie możemy otworzyć projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie stworzonego przez nas środowiska.</p>
-<p>Aby uruchomić program, należy uruchomić główny skrypt, którym jest <code>window.py</code>.</p>
+<h4 id="dodanie-hasa-do-serwera-pocztowego_1">Dodanie hasła do serwera pocztowego</h4>
+<p>Aby dodać hasło aplikacjii dla skonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
+<pre><code class="language-bash">export EMAIL_PASSWORD=&quot;twoje_hasło_aplikaci_google&quot;
+</code></pre>
 
 
 

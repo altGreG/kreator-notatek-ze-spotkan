@@ -240,6 +240,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#implementacje-funkcjonalnosci" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementacje funkcjonalności
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -260,26 +269,6 @@
   
   <span class="md-ellipsis">
     Konfiguracja
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Referencja
   </span>
   
 
@@ -357,6 +346,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#implementacje-funkcjonalnosci" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementacje funkcjonalności
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -384,31 +382,49 @@ słów wypowiedzianych przez uczestników i zrzutów ekranu prezentacji przedsta
 <h2 id="spis-tresci">Spis Treści</h2>
 <ol>
 <li><a href="configuration/">Konfiguracja</a></li>
-<li><a href="reference/">Referencja</a></li>
+<li><a href="reference.md">Referencja</a></li>
 </ol>
 <hr />
 <h2 id="struktura-katalogowa">Struktura Katalogowa</h2>
-<pre><code>project-folder/
-│
-├── app/
-│   ├── nagrania/
-│   │   └── audio/
-│   │
-│   ├── txt/
-│   │
-│   ├── __init__.py
-│   ├── logger.py
-│   ├── recorder.py
-│   ├── saving.py
+<pre><code>kreator-notatek-ze-spotkan
+├── .venv
+├── app
+│   ├── spotkania
+│   ├── styles
+│   ├── utilities
+│   │   ├── api
+│   │   │   ├── __init__.py
+│   │   │   ├── api_key.txt
+│   │   │   ├── openai_api.py
+│   │   ├── __init__.py
+│   │   ├── logger.py
+│   │   ├── mail_sender.py
+│   │   ├── pdf_generator.py
+│   │   ├── recording_utils.py
+│   │   ├── saving.py
+│   ├── recorder_audio.py
+│   ├── screenshots.py
+│   ├── start_recording_and_screenshots.py
 │   ├── transcriptor.py
 │   └── window.py
-│
-├── docs/
+├── docs
+│   ├── assets
+│   ├── modules
+│   │   ├── utilities
+│   │   │   └── ...
+│   │   ├── recorder_audio.md
+│   │   ├── screenshots.md
+│   │   ├── start_recording_and_screenshots.md
+│   │   ├── transcriptor.md
+│   │   └──  window.md
 │   ├── configuration.md
-│   ├── index.md
-│   └── reference.md
-│
+│   └── index.md
+├── site
+├── software
+├── tests
+├── .gitignore
 ├── mkdocs.yml
+├── README.md
 └── requirements.txt
 </code></pre>
 <hr />
@@ -423,12 +439,17 @@ słów wypowiedzianych przez uczestników i zrzutów ekranu prezentacji przedsta
     <div class="doc doc-contents first">
 
         <p>Twórz notatki ze spotkań.</p>
-<p>Moduły eksportowane przez tą paczkę:</p>
+<p>Moduły eksportowane przez tę paczkę:</p>
 <ul>
-<li><code>window</code>: aplikacja gui</li>
-<li><code>recorder</code>: zestaw funkcji do nagrywania obrazu i dźwięku na komputerze</li>
-<li><code>transcriptor</code>: zestaw funkcji do transkrypcji audio i formatowania tekstu</li>
+<li><code>window</code>: aplikacja GUI umożliwiająca zarządzanie sesjami nagrań i transkrypcji za pomocą intuicyjnego interfejsu użytkownika.</li>
+<li><code>recorder</code>: zestaw funkcji do nagrywania obrazu i dźwięku na komputerze, w tym wybór obszaru ekranu oraz zapisanie fragmentów audio.</li>
+<li><code>transcriptor</code>: zestaw funkcji do transkrypcji nagrań audio oraz formatowania uzyskanego tekstu w przejrzystą strukturę.</li>
+<li><code>openai_api</code>: funkcje do generowania podsumowań transkrypcji za pomocą API OpenAI GPT-4.</li>
+<li><code>mail_sender</code>: funkcje do wysyłania e-maili z załącznikami, np. z transkrypcjami lub podsumowaniami.</li>
+<li><code>logger</code>: narzędzie do logowania informacji i komunikatów o błędach w aplikacji.</li>
+<li><code>start_recording_and_screenshots</code>: moduł koordynujący procesy równoległego nagrywania, wykonywania zrzutów ekranu oraz transkrypcji.</li>
 </ul>
+<p>Każdy z modułów odpowiada za określoną funkcjonalność, umożliwiając tworzenie pełnych notatek ze spotkań z wykorzystaniem nagrań, transkrypcji i podsumowań.</p>
 
 
 
@@ -453,7 +474,21 @@ słów wypowiedzianych przez uczestników i zrzutów ekranu prezentacji przedsta
 
     </div>
 
-</div>
+</div><hr />
+<h2 id="implementacje-funkcjonalnosci">Implementacje funkcjonalności</h2>
+<ol>
+<li><a href="modules/window/">Moduł window.py</a></li>
+<li><a href="modules/transcriptor/">Moduł transcriptor.py</a></li>
+<li><a href="modules/screenshots/">Moduł screenshots.py</a></li>
+<li><a href="modules/recorder_audio/">Moduł recorder_audio.py</a></li>
+<li><a href="modules/start_recording_and_screenshots/">Moduł start_recording_and_screenshots.py</a></li>
+<li><a href="modules/utilities/saving/">Moduł saving.py</a></li>
+<li><a href="modules/utilities/recording_utils/">Moduł recording_utils.py</a></li>
+<li><a href="modules/utilities/pdf_generator/">Moduł pdf_generator.py</a></li>
+<li><a href="modules/utilities/mail_sender/">Moduł mail_sender.py</a></li>
+<li><a href="modules/utilities/logger/">Moduł logger.py</a></li>
+<li><a href="modules/utilities/api/openai_api/">Moduł openai_api.py</a></li>
+</ol>
 
 
 
