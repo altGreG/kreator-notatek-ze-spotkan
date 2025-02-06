@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#linux" class="md-skip">
+        <a href="#windows" class="md-skip">
           Skip to content
         </a>
       
@@ -238,9 +238,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stworzenie-wirtualnego-srodowiska" class="md-nav__link">
+  <a href="#konfiguracja-ustawien-audio" class="md-nav__link">
     <span class="md-ellipsis">
-      Stworzenie wirtualnego środowiska
+      Konfiguracja ustawień audio
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stworzenie-wirtualne-srodowisko" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stworzenie wirtualne środowisko
     </span>
   </a>
   
@@ -317,9 +326,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stworzenie-wirtualnego-srodowiska" class="md-nav__link">
+  <a href="#konfiguracja-ustawien-audio" class="md-nav__link">
     <span class="md-ellipsis">
-      Stworzenie wirtualnego środowiska
+      Konfiguracja ustawień audio
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stworzenie-wirtualne-srodowisko" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stworzenie wirtualne środowisko
     </span>
   </a>
   
@@ -358,37 +376,14 @@
                   
 
 
-<h1 id="linux">Linux</h1>
-<h4 id="instalacja-pythona">Instalacja Pythona</h4>
-<pre><code class="language-bash">sudo apt-get install python3 python3-pip
-sudo apt-get install python3-tk
-</code></pre>
-<h4 id="instalacja-oprogramowania-ffmpeg">Instalacja oprogramowania FFMPEG</h4>
-<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install ffmpeg
-</code></pre>
-<h4 id="stworzenie-wirtualnego-srodowiska">Stworzenie wirtualnego środowiska</h4>
-<pre><code class="language-bash">pip install virtualenv 
-python3 -m venv venv
-# wejdź do stworzonego środowiska
-source venv/bin/activate
-</code></pre>
-<h4 id="dodanie-klucza-api-do-openai">Dodanie klucza API do OPENAI</h4>
-<p>Aby dodać klucz api wykonaj komendę:</p>
-<pre><code class="language-bash">export EMAIL_PASSWORD=&quot;twoje_hasło_aplikaci_google&quot;
-</code></pre>
-<h4 id="dodanie-hasa-do-serwera-pocztowego">Dodanie hasła do serwera pocztowego</h4>
-<p>Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
-<pre><code class="language-bash">export OPENAI_API_KEY=&quot;twój_klucz_api&quot;
-</code></pre>
-<hr />
 <h1 id="windows">Windows</h1>
-<h4 id="instalacja-pythona_1">Instalacja Pythona</h4>
+<h4 id="instalacja-pythona">Instalacja Pythona</h4>
 <ol>
 <li>Ze strony python.org (https://www.python.org/downloads/windows/) pobierz najnowszą stabilną wersję Pythona.</li>
 <li>W czasie instalacji kliknij 'Customize Installation' i upewnij się że masz zaznaczone opcje 'pip' oraz 'tcl/tk and idle'. Reszta jest opcjonalna.</li>
 <li>Zainstaluj</li>
 </ol>
-<h4 id="instalacja-oprogramowania-ffmpeg_1">Instalacja oprogramowania FFMPEG</h4>
+<h4 id="instalacja-oprogramowania-ffmpeg">Instalacja oprogramowania FFMPEG</h4>
 <ol>
 <li>Ze strony https://www.gyan.dev/ffmpeg/builds/ pobierz odpowiednią wersję ffpmpeg. Zip z programem znajdziesz w zakładce 'release builds'.</li>
 <li>Rozpakuj program na swoim komputerze w wybranym miejscu, gdzie program zostanie już na stałe.</li>
@@ -405,9 +400,13 @@ python -m venv env
 # wejdź do stworzonego środowiska
 env\Scripts\activate
 </code></pre>
-<h4 id="dodanie-klucza-api-do-openai_1">Dodanie klucza API do OPENAI</h4>
+<h4 id="dodanie-klucza-api-do-openai">Dodanie klucza API do OPENAI</h4>
 <p>Aby dodać klucz api wykonaj komendę:</p>
 <pre><code class="language-bash">setx OPENAI_API_KEY &quot;twój_klucz_api&quot;
+</code></pre>
+<h4 id="dodanie-hasa-do-serwera-pocztowego">Dodanie hasła do serwera pocztowego</h4>
+<p>Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
+<pre><code class="language-bash">setx EMAIL_PASSWORD &quot;twoje_hasło_aplikaci_google&quot;
 </code></pre>
 <hr />
 <h1 id="konfiguracja-pythona-i-uruchomienie-programu-windows-i-linux">Konfiguracja Pythona i uruchomienie programu (Windows i Linux)</h1>
@@ -435,6 +434,29 @@ python -m pip list
 <li>Otwórz projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie stworzonego przez nas środowiska.</li>
 <li>Uruchom program, aby to zrobić należy uruchomić główny skrypt, którym jest <code>window.py</code>.</li>
 </ol>
+<hr />
+<h1 id="linux">Linux</h1>
+<h4 id="instalacja-pythona_1">Instalacja Pythona</h4>
+<pre><code class="language-bash">sudo apt-get install python3 python3-pip
+sudo apt-get install python3-tk
+</code></pre>
+<h4 id="instalacja-oprogramowania-ffmpeg_1">Instalacja oprogramowania FFMPEG</h4>
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install ffmpeg
+</code></pre>
+<h4 id="stworzenie-wirtualnego-srodowiska">Stworzenie wirtualnego środowiska</h4>
+<pre><code class="language-bash">pip install virtualenv 
+python3 -m venv venv
+# wejdź do stworzonego środowiska
+source venv/bin/activate
+</code></pre>
+<h4 id="dodanie-klucza-api-do-openai_1">Dodanie klucza API do OPENAI</h4>
+<p>Aby dodać klucz api wykonaj komendę:</p>
+<pre><code class="language-bash">export OPENAI_API_KEY=&quot;twój_klucz_api&quot;
+</code></pre>
+<h4 id="dodanie-hasa-do-serwera-pocztowego_1">Dodanie hasła do serwera pocztowego</h4>
+<p>Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
+<pre><code class="language-bash">export EMAIL_PASSWORD=&quot;twoje_hasło_aplikaci_google&quot;
+</code></pre>
 
 
 
