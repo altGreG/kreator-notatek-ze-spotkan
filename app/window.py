@@ -50,7 +50,7 @@ from app.utilities.logger import log_status
 from app.utilities.mail_sender import send_email
 from app.utilities.mail_sender import send_email
 from app.utilities.pdf_generator import generate_pdf_from_files
-from recorder_audio import start_recording, stop_recording
+from app.recorder_audio import start_recording, stop_recording
 from loguru import logger as log
 from PIL import Image, ImageDraw, ImageTk, ImageFont
 import os
@@ -62,7 +62,6 @@ recording_active = False  # Śledzenie stanu nagrywania
 transcription_active = False  # Śledzenie stanu transkrypcji nagrania
 font_path = r".\styles\OpenSans-ExtraBoldItalic.ttf"
 selected_audio_device = None  # Przechowywanie wybranego urządzenia audio
-
 if not os.path.exists(font_path):
     raise FileNotFoundError(f"Plik czcionki nie został znaleziony: {font_path}")
 

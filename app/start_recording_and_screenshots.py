@@ -30,8 +30,8 @@ Dzięki modułowi użytkownik ma możliwość kompleksowego zarządzania sesjami
 
 import threading
 import tkinter
-from recorder_audio import start_recording, stop_recording
-from screenshots import select_area, monitor_and_capture, create_output_folder, stop_monitor_and_capture
+from app.recorder_audio import start_recording, stop_recording
+from app.screenshots import select_area, monitor_and_capture, create_output_folder, stop_monitor_and_capture
 from app.transcriptor import transcribe_audio_from_folder
 from app.utilities.recording_utils import create_output_folder
 from loguru import logger as log

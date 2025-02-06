@@ -17,14 +17,6 @@ Włącz urządzenie audio o nazwie typu 'Mix Stereo', pozwoli ona na nagrywanie 
 
 ![StereoMixConfiguration](./assets/StereoMixConfigurationCompressed.gif)
 
-#### Stworzenie wirtualne środowisko
-```bash
-pip install virtualenv 
-python -m venv env
-# wejdź do stworzonego środowiska
-env\Scripts\activate
-```
-
 #### Dodanie klucza API do OPENAI
 Aby dodać klucz api wykonaj komendę:
 ```bash
@@ -32,7 +24,7 @@ setx OPENAI_API_KEY "twój_klucz_api"
 ```
 
 #### Dodanie hasła do serwera pocztowego
-Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:
+Aby dodać hasło aplikacji dla skonfigurowanego konta pocztowego gmail wykonaj komendę:
 ```bash
 setx EMAIL_PASSWORD "twoje_hasło_aplikaci_google"
 ```
@@ -40,27 +32,18 @@ setx EMAIL_PASSWORD "twoje_hasło_aplikaci_google"
 
 # Konfiguracja Pythona i uruchomienie programu (Windows i Linux)
 
-1. Zainstaluj potrzebne zaleźności (zrób to w wirtualnym środowisku)
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-python -m pip install "mkdocstrings[python]"
-pip install -r requirements.txt
-# or
-pip install -U openai-whisper
-pip install setuptools-rust
-pip install speechrecognition
-pip install openai
-pip install google-cloud-speech
-pip install protobuf
-pip install loguru
-pip install pillow
-python -m pip install mkdocs
-python -m pip install mkdocs-material
+### 1. Uruchom Pycharma i skonfiguruj środowisko
 
-python -m pip list
+Otwórz projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie do pobrania bibliotek zawartość requirements.txt i skonfiguruje środowisko.
+
+### 2. Doinstaluj w konsoli z poziomu Pycharma dodatkowe zależności
+
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 
+python -m pip install "mkdocstrings[python]"
 ```
-1. Otwórz projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie stworzonego przez nas środowiska.
-2. Uruchom program, aby to zrobić należy uruchomić główny skrypt, którym jest `window.py`.
+
+### 3. Uruchom program, aby to zrobić należy uruchomić główny skrypt, którym jest `window.py`.
 
 ---
 
@@ -75,13 +58,6 @@ sudo apt-get install python3-tk
 ```bash
 sudo apt update && sudo apt install ffmpeg
 ```
-#### Stworzenie wirtualnego środowiska
-```bash
-pip install virtualenv 
-python3 -m venv venv
-# wejdź do stworzonego środowiska
-source venv/bin/activate
-```
 
 #### Dodanie klucza API do OPENAI
 Aby dodać klucz api wykonaj komendę:
@@ -90,7 +66,7 @@ export OPENAI_API_KEY="twój_klucz_api"
 ```
 
 #### Dodanie hasła do serwera pocztowego
-Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:
+Aby dodać hasło aplikacjii dla skonfigurowanego konta pocztowego gmail wykonaj komendę:
 ```bash
 export EMAIL_PASSWORD="twoje_hasło_aplikaci_google"
 ```

@@ -247,15 +247,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stworzenie-wirtualne-srodowisko" class="md-nav__link">
-    <span class="md-ellipsis">
-      Stworzenie wirtualne środowisko
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#dodanie-klucza-api-do-openai" class="md-nav__link">
     <span class="md-ellipsis">
       Dodanie klucza API do OPENAI
@@ -335,15 +326,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stworzenie-wirtualne-srodowisko" class="md-nav__link">
-    <span class="md-ellipsis">
-      Stworzenie wirtualne środowisko
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#dodanie-klucza-api-do-openai" class="md-nav__link">
     <span class="md-ellipsis">
       Dodanie klucza API do OPENAI
@@ -394,46 +376,23 @@
 <h4 id="konfiguracja-ustawien-audio">Konfiguracja ustawień audio</h4>
 <p>Włącz urządzenie audio o nazwie typu 'Mix Stereo', pozwoli ona na nagrywanie dżwięku na twoim komputerze.</p>
 <p><img alt="StereoMixConfiguration" src="../assets/StereoMixConfigurationCompressed.gif" /></p>
-<h4 id="stworzenie-wirtualne-srodowisko">Stworzenie wirtualne środowisko</h4>
-<pre><code class="language-bash">pip install virtualenv 
-python -m venv env
-# wejdź do stworzonego środowiska
-env\Scripts\activate
-</code></pre>
 <h4 id="dodanie-klucza-api-do-openai">Dodanie klucza API do OPENAI</h4>
 <p>Aby dodać klucz api wykonaj komendę:</p>
 <pre><code class="language-bash">setx OPENAI_API_KEY &quot;twój_klucz_api&quot;
 </code></pre>
 <h4 id="dodanie-hasa-do-serwera-pocztowego">Dodanie hasła do serwera pocztowego</h4>
-<p>Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
+<p>Aby dodać hasło aplikacji dla skonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
 <pre><code class="language-bash">setx EMAIL_PASSWORD &quot;twoje_hasło_aplikaci_google&quot;
 </code></pre>
 <hr />
 <h1 id="konfiguracja-pythona-i-uruchomienie-programu-windows-i-linux">Konfiguracja Pythona i uruchomienie programu (Windows i Linux)</h1>
-<ol>
-<li>Zainstaluj potrzebne zaleźności (zrób to w wirtualnym środowisku)</li>
-</ol>
-<pre><code class="language-bash">pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+<h3 id="1-uruchom-pycharma-i-skonfiguruj-srodowisko">1. Uruchom Pycharma i skonfiguruj środowisko</h3>
+<p>Otwórz projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie do pobrania bibliotek zawartość requirements.txt i skonfiguruje środowisko.</p>
+<h3 id="2-doinstaluj-w-konsoli-z-poziomu-pycharma-dodatkowe-zaleznosci">2. Doinstaluj w konsoli z poziomu Pycharma dodatkowe zależności</h3>
+<pre><code class="language-bash">pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 
 python -m pip install &quot;mkdocstrings[python]&quot;
-pip install -r requirements.txt
-# or
-pip install -U openai-whisper
-pip install setuptools-rust
-pip install speechrecognition
-pip install openai
-pip install google-cloud-speech
-pip install protobuf
-pip install loguru
-pip install pillow
-python -m pip install mkdocs
-python -m pip install mkdocs-material
-
-python -m pip list
 </code></pre>
-<ol>
-<li>Otwórz projekt w Pycharmie, a IDE samo zaproponuje wykorzystanie stworzonego przez nas środowiska.</li>
-<li>Uruchom program, aby to zrobić należy uruchomić główny skrypt, którym jest <code>window.py</code>.</li>
-</ol>
+<h3 id="3-uruchom-program-aby-to-zrobic-nalezy-uruchomic-gowny-skrypt-ktorym-jest-windowpy">3. Uruchom program, aby to zrobić należy uruchomić główny skrypt, którym jest <code>window.py</code>.</h3>
 <hr />
 <h1 id="linux">Linux</h1>
 <h4 id="instalacja-pythona_1">Instalacja Pythona</h4>
@@ -443,18 +402,12 @@ sudo apt-get install python3-tk
 <h4 id="instalacja-oprogramowania-ffmpeg_1">Instalacja oprogramowania FFMPEG</h4>
 <pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install ffmpeg
 </code></pre>
-<h4 id="stworzenie-wirtualnego-srodowiska">Stworzenie wirtualnego środowiska</h4>
-<pre><code class="language-bash">pip install virtualenv 
-python3 -m venv venv
-# wejdź do stworzonego środowiska
-source venv/bin/activate
-</code></pre>
 <h4 id="dodanie-klucza-api-do-openai_1">Dodanie klucza API do OPENAI</h4>
 <p>Aby dodać klucz api wykonaj komendę:</p>
 <pre><code class="language-bash">export OPENAI_API_KEY=&quot;twój_klucz_api&quot;
 </code></pre>
 <h4 id="dodanie-hasa-do-serwera-pocztowego_1">Dodanie hasła do serwera pocztowego</h4>
-<p>Aby dodać hasło aplikaci dla zkonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
+<p>Aby dodać hasło aplikacjii dla skonfigurowanego konta pocztowego gmail wykonaj komendę:</p>
 <pre><code class="language-bash">export EMAIL_PASSWORD=&quot;twoje_hasło_aplikaci_google&quot;
 </code></pre>
 
