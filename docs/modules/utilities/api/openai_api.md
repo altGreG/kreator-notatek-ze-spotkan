@@ -2,4 +2,4 @@
 ---
 ::: app.utilities.api.openai_api
 
-[<- Powrót do strony głównej](/)
+[<- Powrót do strony głównej](../..)

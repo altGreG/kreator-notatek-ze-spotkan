@@ -2,4 +2,4 @@
 ---
 ::: app.utilities.mail_sender
 
-[<- Powrót do strony głównej](/)
+[<- Powrót do strony głównej](../..)

@@ -2,4 +2,4 @@
 ---
 ::: app.start_recording_and_screenshots
 
-[<- Powrót do strony głównej](/)
+[<- Powrót do strony głównej](../..)

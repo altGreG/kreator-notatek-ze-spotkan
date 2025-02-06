@@ -2,4 +2,4 @@
 ---
 ::: app.screenshots
 
-[<- Powrót do strony głównej](/)
+[<- Powrót do strony głównej](../..)

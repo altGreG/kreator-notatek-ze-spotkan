@@ -2,4 +2,4 @@
 ---
 ::: app.recorder_audio
 
-[<- Powrót do strony głównej](/)
+[<- Powrót do strony głównej](../..)

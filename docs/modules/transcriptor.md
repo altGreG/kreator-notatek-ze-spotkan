@@ -2,4 +2,4 @@
 ---
 ::: app.transcriptor
 
-[<- Powrót do strony głównej](/)
+[<- Powrót do strony głównej](../..)
