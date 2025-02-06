@@ -20,27 +20,45 @@ słów wypowiedzianych przez uczestników i zrzutów ekranu prezentacji przedsta
 ## Struktura Katalogowa
 
 ```
-project-folder/
-│
-├── app/
-│   ├── nagrania/
-│   │   └── audio/
-│   │
-│   ├── txt/
-│   │
-│   ├── __init__.py
-│   ├── logger.py
-│   ├── recorder.py
-│   ├── saving.py
+kreator-notatek-ze-spotkan
+├── .venv
+├── app
+│   ├── spotkania
+│   ├── styles
+│   ├── utilities
+│   │   ├── api
+│   │   │   ├── __init__.py
+│   │   │   ├── api_key.txt
+│   │   │   ├── openai_api.py
+│   │   ├── __init__.py
+│   │   ├── logger.py
+│   │   ├── mail_sender.py
+│   │   ├── pdf_generator.py
+│   │   ├── recording_utils.py
+│   │   ├── saving.py
+│   ├── recorder_audio.py
+│   ├── screenshots.py
+│   ├── start_recording_and_screenshots.py
 │   ├── transcriptor.py
 │   └── window.py
-│
-├── docs/
+├── docs
+│   ├── assets
+│   ├── modules
+│   │   ├── utilities
+│   │   │   └── ...
+│   │   ├── recorder_audio.md
+│   │   ├── screenshots.md
+│   │   ├── start_recording_and_screenshots.md
+│   │   ├── transcriptor.md
+│   │   └──  window.md
 │   ├── configuration.md
-│   ├── index.md
-│   └── reference.md
-│
+│   └── index.md
+├── site
+├── software
+├── tests
+├── .gitignore
 ├── mkdocs.yml
+├── README.md
 └── requirements.txt
 ```
 
