@@ -146,6 +146,12 @@ def monitor_and_capture(area: list[int], folder: str, threshold:float = 2.0):
     count = 0
     recording_active = True  # Flaga kontrolna
 
+    # Zrób aktualny zrzut ekranu
+    screenshot = ImageGrab.grab(bbox).convert("RGB")
+    first_output_file = os.path.join(folder, f"{datetime.now().strftime("%H-%M-%S")}.jpg")
+    screenshot.save(first_output_file, "JPEG", quality=85)
+    log.success(f"Zapisano zrzut ekranu: {first_output_file.replace("\\", "/").rsplit("/", 1)[1]}")
+
     try:
         while recording_active:
             # Zrób aktualny zrzut ekranu

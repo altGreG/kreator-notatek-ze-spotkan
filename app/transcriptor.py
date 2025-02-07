@@ -147,7 +147,7 @@ def transcribe_audio_from_folder(folder_path: str, update_status: Callable[[str]
                 # zapis tranksrypcji do odpowiedniego pliku .txt
                 save_text_to_txt(filename, transcribed_text,update_status,transcription_folder)
                 log.debug(f"Liczba przetranskrybowanych plików: {count_of_transcribed}")
-                log_status(f"Czas nagrywania: {(count_of_transcribed*30)/60} min", "info", update_status)
+                log_status(f"Czas nagrywania: {(count_of_transcribed*20)/60 : .2f} min", "info", update_status)
 
         time.sleep(0.1)
 
